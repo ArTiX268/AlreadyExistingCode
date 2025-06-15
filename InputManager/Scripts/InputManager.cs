@@ -31,6 +31,11 @@ public class InputManager : MonoBehaviour
     private void OnEnable()
     {
         inputActions.Enable();
+
+        // Assign and enable inputs here.
+        // Exemple :
+        //jumpInput = inputActions.Player.Jump;
+        //jumpInput.Enable();
     }
 
     private void OnDisable()
