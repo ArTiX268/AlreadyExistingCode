@@ -15,7 +15,7 @@ public class InputManager : MonoBehaviour
     private InputManager instance;
     private PlayerInputActions inputActions;
 
-    // Create your inputs here.
+    // Create your inputs here and declare them as static.
 
     private void Awake()
     {
