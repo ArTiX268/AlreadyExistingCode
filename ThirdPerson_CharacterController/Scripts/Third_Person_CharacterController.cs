@@ -4,20 +4,27 @@ using UnityEngine.InputSystem;
 public class Third_Person_CharacterController : MonoBehaviour
 {
     [Header("Movement")]
-    [SerializeField] private float speed;
+    [SerializeField] private float groudSpeed;
+    [SerializeField] private float airSpeed;
     [SerializeField] private float jumpForce;
+    [SerializeField] private float rotationSpeed;
     [SerializeField] private LayerMask groundLayer;
+
+    [SerializeField] private bool orientePlayerToMovement;
 
     [Header("Camera")]
     [SerializeField] private float sensitivity;
     [SerializeField] private Transform followTarget;
-
-    private Camera cam;
+    [SerializeField] private Vector3 followTargetOffset;
 
     private Rigidbody rb;
 
+    private Transform mainCamera;
+
     private Vector2 movementVector;
     private Vector2 lookVector;
+
+    private float speed;
 
     private void Awake()
     {
@@ -26,9 +33,11 @@ public class Third_Person_CharacterController : MonoBehaviour
 
     private void Start()
     {
-        cam = Camera.main;
-
         InputManager.AssignEvent(ref InputManager.jumpAction, Jump, EventType.Started);
+
+        mainCamera = Camera.main.transform;
+
+        followTargetOffset = followTarget.position - transform.position;
     }
 
     private void Update()
@@ -36,6 +45,7 @@ public class Third_Person_CharacterController : MonoBehaviour
         movementVector = InputManager.moveAction.ReadValue<Vector2>();
         lookVector = InputManager.lookAction.ReadValue<Vector2>();
 
+        followTarget.position = transform.position + followTargetOffset;
         RotateCamera();
     }
 
@@ -47,45 +57,57 @@ public class Third_Person_CharacterController : MonoBehaviour
 
     private void MovePlayer()
     {
-        rb.velocity = CalculateNewVelocity(transform.forward, transform.right);
+        rb.velocity = CalculateNewVelocity();
     }
 
-    private Vector3 CalculateNewVelocity(Vector3 forward, Vector3 right)
+    private Vector3 CalculateNewVelocity()
     {
+        GetCameraForward_Right(out Vector3 forward, out Vector3 right);
+
+        speed = IsOnGround() ? groudSpeed : airSpeed;
+
         forward *= speed * movementVector.y;
         right *= speed * movementVector.x;
+
+        OrientPlayerToMovement();
 
         return forward + right + new Vector3(0, rb.velocity.y);
     }
 
-    private void RotateCamera()
+    private void GetCameraForward_Right(out Vector3 forward, out Vector3 right)
     {
-        transform.rotation *= Quaternion.AngleAxis(lookVector.x * sensitivity, Vector3.up);
-
-        RotateCameraAroundX_Axis();
+        forward = FlattenVector(mainCamera.forward);
+        right = FlattenVector(mainCamera.right);
     }
 
-    private void RotateCameraAroundX_Axis()
+    private Vector3 FlattenVector(Vector3 vector)
     {
-        followTarget.transform.rotation *= Quaternion.AngleAxis(-lookVector.y * sensitivity, Vector3.right);
+        vector.y = 0;
+        return vector.normalized;
+    }
 
-        var angles = followTarget.transform.localEulerAngles;
-        angles.z = 0;
+    private void OrientPlayerToMovement()
+    {
+        if (movementVector.x != 0 || movementVector.y != 0)
+        {
+            Vector3 cameraForward = FlattenVector(Camera.main.transform.forward);
 
-        var angle = followTarget.transform.localEulerAngles.x;
+            transform.forward = Vector3.Slerp(transform.forward, cameraForward, rotationSpeed * Time.fixedDeltaTime);
+        }
+    }
 
-        if (angle > 180 && angle < 320)
-            angles.x = 320;
-        else if (angle < 180 && angle > 60)
-            angles.x = 60;
-
-        followTarget.transform.localEulerAngles = angles;
+    private void RotateCamera()
+    {
+        followTarget.Rotate(Vector3.up, lookVector.x * sensitivity, Space.World);
+        followTarget.Rotate(Vector3.right, -lookVector.y * sensitivity, Space.Self);
     }
 
     private void Jump(InputAction.CallbackContext context)
     {
         if (IsOnGround())
+        {
             rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+        }
     }
 
     private bool IsOnGround()
