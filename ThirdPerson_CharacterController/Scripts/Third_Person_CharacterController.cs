@@ -10,8 +10,6 @@ public class Third_Person_CharacterController : MonoBehaviour
     [SerializeField] private float rotationSpeed;
     [SerializeField] private LayerMask groundLayer;
 
-    [SerializeField] private bool orientePlayerToMovement;
-
     [Header("Camera")]
     [SerializeField] private float sensitivity;
     [SerializeField] private Transform followTarget;
