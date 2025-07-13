@@ -108,5 +108,23 @@ namespace ArTiX
             Physics.Raycast(ray, out RaycastHit hit, 1000);
             return hit.point;
         }
+
+        public static Vector2 GetRandomPointWithinSquare(float width, float height, Vector2 origin)
+        {
+            width *= .5f;
+            height *= .5f;
+            float xValue = Random.Range(-width, width);
+            float yValue = Random.Range(-height, height);
+            Vector2 randomPoint = new(xValue, yValue);
+            return randomPoint + origin;
+        }
+
+        public static Vector2 GetRandomPointWithinBoxCollider(BoxCollider2D collider2D)
+        {
+            return GetRandomPointWithinSquare(
+                collider2D.size.x * collider2D.transform.localScale.x,
+                collider2D.size.y * collider2D.transform.localScale.y,
+                collider2D.transform.position);
+        }
     }
 }
