@@ -126,5 +126,21 @@ namespace ArTiX
                 collider2D.size.y * collider2D.transform.localScale.y,
                 collider2D.transform.position);
         }
+
+        public static Vector3 GetTrueScaleOfObject(Transform transform)
+        {
+            Vector3 trueScale = Vector3.one;
+
+            while (transform != null)
+            {
+                trueScale.x = trueScale.x * transform.localScale.x;
+                trueScale.y = trueScale.y * transform.localScale.y;
+                trueScale.z = trueScale.z * transform.localScale.z;
+
+                transform = transform.parent;
+            }
+
+            return trueScale;
+        }
     }
 }
