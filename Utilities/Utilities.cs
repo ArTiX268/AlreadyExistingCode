@@ -119,11 +119,13 @@ namespace ArTiX
             return randomPoint + origin;
         }
 
-        public static Vector2 GetRandomPointWithinBoxCollider(BoxCollider2D collider2D)
+        public static Vector2 GetRandomPointWithinBoxCollider2D(BoxCollider2D collider2D)
         {
+            Vector3 objectScale = GetTrueScaleOfObject(collider2D.transform);
+
             return GetRandomPointWithinSquare(
-                collider2D.size.x * collider2D.transform.localScale.x,
-                collider2D.size.y * collider2D.transform.localScale.y,
+                collider2D.size.x * objectScale.x,
+                collider2D.size.y * objectScale.y,
                 collider2D.transform.position);
         }
 
