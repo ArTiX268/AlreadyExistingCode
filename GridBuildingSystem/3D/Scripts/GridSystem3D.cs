@@ -99,7 +99,7 @@ public class GridSystem3D<TGridObject>
 
     public Vector3 GetMouseSnappedPosition()
     {
-        Vector2 mousePos = Utilities.GetMousePosition3D();
+        Vector3 mousePos = Utilities.GetMousePosition3D();
         GetXZ(mousePos, out int x, out int z);
         return GetWorldPosition(x, z);
     }

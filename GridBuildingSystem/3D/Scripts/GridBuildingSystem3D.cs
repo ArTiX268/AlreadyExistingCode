@@ -115,18 +115,26 @@ public class GridBuildingSystem3D : MonoBehaviour
         if (CanBuild(gridPositionList))
         {
             Vector3 placedObjectWorldPosition = gridSystem.GetWorldPosition(x, z) + (new Vector3(cellSize, 0, cellSize) / 2);
-            PlacedObject3D placedObject =
+
+            try
+            {
+                PlacedObject3D placedObject =
                 Instantiate(
                 currentBuilding.prefab,
                 placedObjectWorldPosition,
                 Quaternion.Euler(currentBuilding.visual.transform.rotation.x, currentBuilding.GetRotationAngle(currentDirection), 0))
                 .GetComponent<PlacedObject3D>();
 
-            placedObject.gridPositionList = gridPositionList;
+                placedObject.gridPositionList = gridPositionList;
 
-            foreach (Vector2Int gridPosition in gridPositionList)
+                foreach (Vector2Int gridPosition in gridPositionList)
+                {
+                    gridSystem.SetGridObject(gridPosition.x, gridPosition.y, placedObject);
+                }
+            }
+            catch
             {
-                gridSystem.SetGridObject(gridPosition.x, gridPosition.y, placedObject);
+                Debug.LogError("There is no PlacedObject3D script on the prefab of the current building.");
             }
         }
     }
@@ -193,7 +201,7 @@ public class GridBuildingSystem3D : MonoBehaviour
                 currentBuilding.visual,
                 GetMouseSnappedPosition(),
                 Quaternion.Euler(
-                    90,
+                    0,
                     currentBuilding.GetRotationAngle(currentDirection),
                     0))
                 .transform;
@@ -208,7 +216,7 @@ public class GridBuildingSystem3D : MonoBehaviour
     private Vector3 GetMouseSnappedPosition()
     {
         gridSystem.GetXZ(Utilities.GetMousePosition3D(), out int x, out int z);
-        return new Vector3(x, 0, z) + new Vector3(cellSize, 0, cellSize) / 2;
+        return new Vector3(x * cellSize, 0, z * cellSize) + new Vector3(cellSize, 0, cellSize) / 2;
     }
 
     private void RefreshGhost()
