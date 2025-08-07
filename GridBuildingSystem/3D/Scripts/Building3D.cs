@@ -5,9 +5,6 @@ public class Building3D : ScriptableObject
 {
     public Vector2Int[] occupiedCells;
 
-    [Tooltip("It's the middle of the building, you have to define it.")]
-    public Vector2Int centerCell;
-
     public Transform prefab;
     public GameObject visual;
 
@@ -20,16 +17,16 @@ public class Building3D : ScriptableObject
             switch (direction)
             {
                 case Direction.Down:
-                    gridPositionList[i] = new Vector2Int(occupiedCells[i].x, occupiedCells[i].y) + offset - centerCell;
+                    gridPositionList[i] = new Vector2Int(occupiedCells[i].x, occupiedCells[i].y) + offset;
                     break;
                 case Direction.Right:
-                    gridPositionList[i] = new Vector2Int(-occupiedCells[i].y, occupiedCells[i].x) + offset - centerCell;
+                    gridPositionList[i] = new Vector2Int(-occupiedCells[i].y, occupiedCells[i].x) + offset;
                     break;
                 case Direction.Up:
-                    gridPositionList[i] = new Vector2Int(-occupiedCells[i].x, -occupiedCells[i].y) + offset - centerCell;
+                    gridPositionList[i] = new Vector2Int(-occupiedCells[i].x, -occupiedCells[i].y) + offset;
                     break;
                 case Direction.Left:
-                    gridPositionList[i] = new Vector2Int(occupiedCells[i].y, -occupiedCells[i].x) + offset - centerCell;
+                    gridPositionList[i] = new Vector2Int(occupiedCells[i].y, -occupiedCells[i].x) + offset;
                     break;
             }
         }

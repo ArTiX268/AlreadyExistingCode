@@ -114,7 +114,7 @@ public class GridBuildingSystem3D : MonoBehaviour
 
         if (CanBuild(gridPositionList))
         {
-            Vector3 placedObjectWorldPosition = gridSystem.GetWorldPosition(x - currentBuilding.centerCell.x, z - currentBuilding.centerCell.y) + (new Vector3(cellSize, 0, cellSize) / 2);
+            Vector3 placedObjectWorldPosition = gridSystem.GetWorldPosition(x, z) + (new Vector3(cellSize, 0, cellSize) / 2);
 
             try
             {
@@ -231,11 +231,7 @@ public class GridBuildingSystem3D : MonoBehaviour
     private Vector3 GetMouseSnappedPosition()
     {
         gridSystem.GetXZ(Utilities.GetMousePosition3D(), out int x, out int z);
-        return new Vector3(
-            (x - currentBuilding.centerCell.x) * cellSize,
-            0,
-            (z - currentBuilding.centerCell.y) * cellSize)
-            + new Vector3(cellSize, 0, cellSize) / 2;
+        return new Vector3((x) * cellSize, 0, (z) * cellSize) + new Vector3(cellSize, 0, cellSize) / 2;
     }
 
     private void RefreshGhost()
