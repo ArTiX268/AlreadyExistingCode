@@ -1,5 +1,4 @@
 using ArTiX;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class GridBuildingSystem3D : MonoBehaviour
@@ -11,6 +10,9 @@ public class GridBuildingSystem3D : MonoBehaviour
     [SerializeField] private Vector3 originPosition;
 
     [SerializeField] private Building3D[] buildings;
+
+    [SerializeField] private Material canBuildMat;
+    [SerializeField] private Material cannotBuildMat;
 
     [HideInInspector] public Building3D currentBuilding;
 
@@ -107,14 +109,12 @@ public class GridBuildingSystem3D : MonoBehaviour
     {
         gridSystem.GetXZ(worldPos, out int x, out int z);
         Vector2Int offset = new(x, z);
-        Vector2Int diagonal = currentBuilding.GetDiagonal(currentDirection);
-        Vector2Int halfedDiagonal = new(Mathf.RoundToInt((diagonal.x - .01f) / 2), Mathf.RoundToInt((diagonal.y - .01f) / 2));
 
-        List<Vector2Int> gridPositionList = currentBuilding.GetGridPositionList(offset - halfedDiagonal, currentDirection);
+        Vector2Int[] gridPositionList = currentBuilding.GetGridPositionList(offset, currentDirection);
 
         if (CanBuild(gridPositionList))
         {
-            Vector3 placedObjectWorldPosition = gridSystem.GetWorldPosition(x, z) + (new Vector3(cellSize, 0, cellSize) / 2);
+            Vector3 placedObjectWorldPosition = gridSystem.GetWorldPosition(x - currentBuilding.centerCell.x, z - currentBuilding.centerCell.y) + (new Vector3(cellSize, 0, cellSize) / 2);
 
             try
             {
@@ -156,7 +156,7 @@ public class GridBuildingSystem3D : MonoBehaviour
             return false;
     }
 
-    private bool CanBuild(List<Vector2Int> gridPositionList)
+    private bool CanBuild(Vector2Int[] gridPositionList)
     {
         foreach (Vector2Int gridPosition in gridPositionList)
         {
@@ -175,7 +175,7 @@ public class GridBuildingSystem3D : MonoBehaviour
         try
         {
             PlacedObject3D placedObject = gridSystem.GetGridObject(x, z);
-            List<Vector2Int> gridPositionList = placedObject.gridPositionList;
+            Vector2Int[] gridPositionList = placedObject.gridPositionList;
 
             foreach (Vector2Int gridPosition in gridPositionList)
             {
@@ -210,13 +210,32 @@ public class GridBuildingSystem3D : MonoBehaviour
     private void MoveGhost()
     {
         if (currentGhost != null)
+        {
             currentGhost.position = GetMouseSnappedPosition();
+
+            gridSystem.GetXZ(Utilities.GetMousePosition3D(), out int x, out int z);
+            Vector2Int offset = new(x, z);
+
+            Vector2Int[] gridPositionList = currentBuilding.GetGridPositionList(offset, currentDirection);
+
+            MeshRenderer[] meshRenderers = currentGhost.GetComponentsInChildren<MeshRenderer>();
+
+            for (int i = 0; i < meshRenderers.Length; i++)
+                if (CanBuild(gridPositionList))
+                    meshRenderers[i].material = canBuildMat;
+                else
+                    meshRenderers[i].material = cannotBuildMat;
+        }
     }
 
     private Vector3 GetMouseSnappedPosition()
     {
         gridSystem.GetXZ(Utilities.GetMousePosition3D(), out int x, out int z);
-        return new Vector3(x * cellSize, 0, z * cellSize) + new Vector3(cellSize, 0, cellSize) / 2;
+        return new Vector3(
+            (x - currentBuilding.centerCell.x) * cellSize,
+            0,
+            (z - currentBuilding.centerCell.y) * cellSize)
+            + new Vector3(cellSize, 0, cellSize) / 2;
     }
 
     private void RefreshGhost()

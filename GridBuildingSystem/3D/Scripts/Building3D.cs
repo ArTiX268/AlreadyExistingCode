@@ -1,63 +1,40 @@
-using System.Collections.Generic;
 using UnityEngine;
 
 [CreateAssetMenu()]
 public class Building3D : ScriptableObject
 {
-    public int width;
-    public int height;
+    public Vector2Int[] occupiedCells;
+
+    [Tooltip("It's the middle of the building, you have to define it.")]
+    public Vector2Int centerCell;
 
     public Transform prefab;
     public GameObject visual;
 
-    public List<Vector2Int> GetGridPositionList(Vector2Int offset, Direction direction)
+    public Vector2Int[] GetGridPositionList(Vector2Int offset, Direction direction)
     {
-        List<Vector2Int> gridPositionList = new();
-        switch (direction)
-        {
-            case Direction.Up:
-            case Direction.Down:
-                for (int x = 0; x < width; x++)
-                {
-                    for (int z = 0; z < height; z++)
-                    {
-                        gridPositionList.Add(new Vector2Int(x, z) + offset);
-                    }
-                }
-                break;
+        Vector2Int[] gridPositionList = new Vector2Int[occupiedCells.Length];
 
-            case Direction.Left:
-            case Direction.Right:
-                for (int x = 0; x < height; x++)
-                {
-                    for (int z = 0; z < width; z++)
-                    {
-                        gridPositionList.Add(new Vector2Int(x, z) + offset);
-                    }
-                }
-                break;
+        for (int i = 0; i < gridPositionList.Length; i++)
+        {
+            switch (direction)
+            {
+                case Direction.Down:
+                    gridPositionList[i] = new Vector2Int(occupiedCells[i].x, occupiedCells[i].y) + offset - centerCell;
+                    break;
+                case Direction.Right:
+                    gridPositionList[i] = new Vector2Int(-occupiedCells[i].y, occupiedCells[i].x) + offset - centerCell;
+                    break;
+                case Direction.Up:
+                    gridPositionList[i] = new Vector2Int(-occupiedCells[i].x, -occupiedCells[i].y) + offset - centerCell;
+                    break;
+                case Direction.Left:
+                    gridPositionList[i] = new Vector2Int(occupiedCells[i].y, -occupiedCells[i].x) + offset - centerCell;
+                    break;
+            }
         }
 
         return gridPositionList;
-    }
-
-    public Vector2Int GetDiagonal(Direction direction)
-    {
-        Vector2Int diagonal = Vector2Int.zero;
-
-        switch (direction)
-        {
-            case Direction.Up:
-            case Direction.Down:
-                diagonal = new Vector2Int(width, height);
-                break;
-
-            case Direction.Right:
-            case Direction.Left:
-                diagonal = new Vector2Int(height, width);
-                break;
-        }
-        return diagonal;
     }
 
     public int GetRotationAngle(Direction dir)
