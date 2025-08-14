@@ -19,14 +19,11 @@ public class GridSystem3D<TGridObject>
         grid = new TGridObject[width, height];
     }
 
-    public int GetWidth()
-    { return width; }
+    public int GetWidth() => width;
 
-    public int GetHeight()
-    { return height; }
+    public int GetHeight() => height;
 
-    public float GetCellSize()
-    { return cellSize; }
+    public float GetCellSize() => cellSize;
 
     public TGridObject GetGridObject(Vector3 position)
     {
@@ -76,6 +73,14 @@ public class GridSystem3D<TGridObject>
         {
             return;
         }
+    }
+
+    public bool IsInGrid(int x, int z)
+    {
+        bool isWithinWidth = x >= 0 && x < width;
+        bool isWithinHeight = z >= 0 && z < height;
+
+        return isWithinWidth && isWithinHeight;
     }
 
     public void GetXZ(Vector3 worldPosition, out int x, out int z)

@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using UnityEngine;
 
 public enum Direction
@@ -11,5 +10,6 @@ public enum Direction
 
 public class PlacedObject3D : MonoBehaviour
 {
-    [HideInInspector] public List<Vector2Int> gridPositionList;
+    [HideInInspector] public Vector2Int[] gridPositionList;
+    [HideInInspector] public BuildingType buildingType;
 }
