@@ -144,5 +144,15 @@ namespace ArTiX
 
             return trueScale;
         }
+
+        public static Vector3 PutVectorOnXZPlane(Vector3 vector)
+        {
+            return new Vector3(vector.x, 0, vector.z);
+        }
+
+        public static Vector3 PutVectorOnZYPlane(Vector3 vector)
+        {
+            return new Vector3(0, vector.x, vector.z);
+        }
     }
 }
