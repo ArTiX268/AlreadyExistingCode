@@ -1,20 +1,28 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class TimerManager : ScriptableObject
+public class TimerManager : MonoBehaviour
 {
-    public static List<GameObject> timers = new List<GameObject>();
+    private static readonly List<Timer> timers = new List<Timer>();
 
-    public static Timer CreateTimer(string timerName)
+    public static Timer CreateTimer(float duration, bool fixedTimer = false, bool scaled = true, int repetitionNumber = 0, Action finishedEvent = null)
     {
-        GameObject timer = new GameObject(timerName);
+        Timer timer = new Timer(duration, fixedTimer, scaled, repetitionNumber, finishedEvent);
         timers.Add(timer);
-        return timer.AddComponent(typeof(Timer)) as Timer;
+        return timer;
     }
 
-    public static void DestroyTimer(GameObject timerToDestroy)
+    public static void RemoveTimer(Timer timer)
     {
-        timers.Remove(timerToDestroy);
-        Destroy(timerToDestroy);
+        timers.Remove(timer);
+    }
+
+    private void Update()
+    {
+        foreach (Timer timer in timers)
+        {
+            timer.IncrementTimer();
+        }
     }
 }
