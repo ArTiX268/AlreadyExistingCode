@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using static UnityEngine.InputSystem.InputAction;
 
-public class InputManager : MonoBehaviour
+public abstract class InputManager : MonoBehaviour
 {
     public enum EventType
     {
@@ -18,45 +18,20 @@ public class InputManager : MonoBehaviour
         Move,
         Look,
         Jump,
+        Run,
+        Crouch
     }
 
-    private PlayerInputActions inputActionScript;
-    public Dictionary<EAction, InputAction> inputActions;
+    public InputManager Instance { get; private set; }
 
-    // Create your inputs here and declare them as static.
-    private InputAction moveAction;
-    private InputAction lookAction;
-    private InputAction jumpAction;
-    /// <summary>
-    /// Dictionary that links the input action to an ID.
-    /// Used for inventory slots.
-    /// </summary>
-    private Dictionary<InputAction, uint> inventorySlotActionIdDictionary = new Dictionary<InputAction, uint>();
+    protected PlayerInputActions InputActionScript {  get; private set; }
+    protected readonly Dictionary<EAction, InputAction> inputActions = new();
 
-    private void OnEnable()
+    private void Awake()
     {
-        inputActionScript = new();
-        inputActionScript.Enable();
-        inputActions = new Dictionary<EAction, InputAction>();
+        Instance = this;
 
-        // Assign and enable inputs here.
-        // Exemple :
-        jumpAction = inputActionScript.Player.Jump;
-        jumpAction.Enable();
-        inputActions.Add(EAction.Jump, jumpAction);
-
-        moveAction = inputActionScript.Player.Movement;
-        moveAction.Enable();
-        inputActions.Add(EAction.Move, moveAction);
-
-        lookAction = inputActionScript.Player.Look;
-        lookAction.Enable();
-        inputActions.Add(EAction.Look, lookAction);
-    }
-
-    private void OnDisable()
-    {
-        inputActionScript.Disable();
+        InputActionScript = new();
     }
 
     public void EnableInput(EAction action) => inputActions[action].Enable();
@@ -110,7 +85,5 @@ public class InputManager : MonoBehaviour
             AssignInput(action, assigningEvent, eventType);
     }
 
-    public InputAction GetAction(EAction action) => inputActions[action];
-
-    public uint GetInventorySlotID(InputAction inputAction) => inventorySlotActionIdDictionary[inputAction];
+    public InputAction GetInputAction(EAction action) => inputActions[action];
 }
