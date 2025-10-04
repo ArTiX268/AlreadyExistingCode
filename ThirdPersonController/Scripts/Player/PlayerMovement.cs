@@ -21,6 +21,7 @@ public class PlayerMovement : MonoBehaviour
 
     [Title("Speed")]
     [SerializeField, SuffixLabel("m/s")] private float maxWalkSpeed;
+
     [SerializeField, SuffixLabel("m/s")] private float maxBackwardSpeed;
     [SerializeField, SuffixLabel("m/s")] private float maxRunSpeed;
     [SerializeField, SuffixLabel("m/s")] private float maxCrouchedSpeed;
@@ -29,17 +30,20 @@ public class PlayerMovement : MonoBehaviour
 
     [Title("Air Movement")]
     [SerializeField, SuffixLabel("m")] private float jumpHeight;
+
     [SerializeField, SuffixLabel("s")] private float timeToReachJumpHeight;
     [SerializeField] private float fallingGravityMultiplier = 1;
     [SerializeField, Range(0, 1), Tooltip("The closer to one, the most air control you have.")] private float airControl = 1;
 
     [Title("Rotation")]
     [SerializeField, Tooltip("The player will rotate to face the direction it's moving. If false, it will rotate to face where the camera is facing.")] private bool rotateToMovement = false;
+
     [SerializeField, Tooltip("Rotates the player even when he's not moving."), HideIf("rotateToMovement")] private bool rotateWhenIdle = false;
     [SerializeField] private float rotationSpeed;
 
     [Title("Crouching")]
     [SerializeField] private bool holdToCrouch;
+
     [SerializeField] private float crouchingSpeed;
     [SerializeField] private float capsuleCrouchedHeight;
     [SerializeField] private float capsuleStandingHeight;
@@ -48,7 +52,6 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private bool jumpUncrouches;
 
     [Title("References")]
-    [SerializeField, Required, SceneObjectsOnly] private InputManager inputManager;
     [SerializeField, Required, SceneObjectsOnly] private Transform cameraTransform;
 
     #endregion Serialized
@@ -60,6 +63,7 @@ public class PlayerMovement : MonoBehaviour
 
     // Used to determine the displacement.
     private Vector3 movementVector = new();
+
     private Vector2 movementInputVector;
     private Vector3 velocity;
     private float currentSpeed;
@@ -68,17 +72,22 @@ public class PlayerMovement : MonoBehaviour
 
     // Jump
     private float jumpForce;
+
     private float gravity;
 
     // Camera
     private Vector3 cameraForward;
+
     private Vector3 cameraRight;
 
     // Crouch
     private Vector3 capsuleTargetCenter;
+
     private float capsuleTargetHeight;
     private bool isCrouched;
+
     public event EventHandler<bool> OnCrouching;
+    public event EventHandler OnJumping;
 
     #region Constants & Readonlies
 
@@ -110,20 +119,17 @@ public class PlayerMovement : MonoBehaviour
 
     private void Start()
     {
-        void AssignInput()
-        {
-            inputManager.AssignInput(InputManager.EAction.Jump, Jump, InputManager.EventType.Started);
+        InputManager lInstance = InputManager.Instance;
 
-            inputManager.AssignInput(InputManager.EAction.Run, Run, InputManager.EventType.Started);
-            inputManager.AssignInput(InputManager.EAction.Run, Run, InputManager.EventType.Canceled);
+        lInstance.AssignInput(InputManager.EAction.Jump, Jump, InputManager.EventType.Started);
 
-            inputManager.AssignInput(InputManager.EAction.Crouch, CallCrouch, InputManager.EventType.Started);
+        lInstance.AssignInput(InputManager.EAction.Run, Run, InputManager.EventType.Started);
+        lInstance.AssignInput(InputManager.EAction.Run, Run, InputManager.EventType.Canceled);
 
-            if (holdToCrouch)
-                inputManager.AssignInput(InputManager.EAction.Crouch, CallCrouch, InputManager.EventType.Canceled);
-        }
+        lInstance.AssignInput(InputManager.EAction.Crouch, CallCrouch, InputManager.EventType.Started);
 
-        AssignInput();
+        if (holdToCrouch)
+            lInstance.AssignInput(InputManager.EAction.Crouch, CallCrouch, InputManager.EventType.Canceled);
     }
 
     private void Update()
@@ -185,16 +191,17 @@ public class PlayerMovement : MonoBehaviour
 
             SelectTargetSpeed();
 
-            if (Mathf.Abs(currentSpeed - targetSpeed) < SPEED_DEAD_ZONE)
-                currentSpeed = targetSpeed;
+            if (Mathf.Abs(currentSpeed - targetSpeed) < SPEED_DEAD_ZONE) currentSpeed = targetSpeed;
             else
+            {
                 currentSpeed = Mathf.Lerp(
                                           a: currentSpeed,
                                           b: targetSpeed,
                                           t: Time.deltaTime * (movementInputVector != Vector2.zero ? acceleration : deceleration) * (characterController.isGrounded ? 1 : airControl));
+            }
         }
 
-        movementInputVector = inputManager.GetInputAction(InputManager.EAction.Move).ReadValue<Vector2>();
+        movementInputVector = InputManager.Instance.GetInputAction(InputManager.EAction.Move).ReadValue<Vector2>();
 
         if (movementInputVector != Vector2.zero)
             CalculateMovementVector();
@@ -228,6 +235,7 @@ public class PlayerMovement : MonoBehaviour
             }
 
             velocity.y = jumpForce;
+            OnJumping?.Invoke(this, EventArgs.Empty);
         }
     }
 
@@ -269,7 +277,7 @@ public class PlayerMovement : MonoBehaviour
     {
         isCrouched = pCrouch;
         capsuleTargetCenter = pCrouch ? capsuleCrouchedCenter : capsuleStandingCenter;
-        capsuleTargetHeight = pCrouch? capsuleCrouchedHeight : capsuleStandingHeight;
+        capsuleTargetHeight = pCrouch ? capsuleCrouchedHeight : capsuleStandingHeight;
 
         OnCrouching?.Invoke(this, isCrouched);
     }

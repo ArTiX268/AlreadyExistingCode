@@ -37,7 +37,6 @@ public class CameraController : MonoBehaviour
     [SerializeField, Range(0.1f, 2)] private float sensitivity_Y;
 
     [Title("References")]
-    [SerializeField, Required] private InputManager inputManager;
     [SerializeField, Required] private PlayerMovement playerMovement;
 
     #endregion Serialized
@@ -94,8 +93,8 @@ public class CameraController : MonoBehaviour
     {
         void CalculateTargetRotation()
         {
-            targetCameraYaw += inputManager.GetInputAction(InputManager.EAction.Look).ReadValue<Vector2>().x * sensitivity_X;
-            targetCameraPitch += inputManager.GetInputAction(InputManager.EAction.Look).ReadValue<Vector2>().y * sensitivity_Y;
+            targetCameraYaw += InputManager.Instance.GetInputAction(InputManager.EAction.Look).ReadValue<Vector2>().x * sensitivity_X;
+            targetCameraPitch += InputManager.Instance.GetInputAction(InputManager.EAction.Look).ReadValue<Vector2>().y * sensitivity_Y;
             targetCameraPitch = Mathf.Clamp(targetCameraPitch, minHeadPitch, maxHeadPitch);
         }
         void Rotate()
