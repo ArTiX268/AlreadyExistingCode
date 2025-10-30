@@ -158,15 +158,15 @@ namespace ArTiX
 
     public class MyCursor
     {
-        public static Vector2 GetMousePosition2D(Cursor cursor, Camera camera)
+        public static Vector2 GetMousePosition2D(Camera camera)
         {
             Vector2 mousePos = Input.mousePosition;
             return camera.ScreenToWorldPoint(mousePos);
         }
 
-        public static Vector2 GetMousePosition2D(Cursor cursor) => GetMousePosition2D(cursor, Camera.main);
+        public static Vector2 GetMousePosition2D() => GetMousePosition2D(Camera.main);
 
-        public static Vector3 GetMousePosition3D(Cursor cursor, Camera camera)
+        public static Vector3 GetMousePosition3D(Camera camera)
         {
             Vector2 mousePos = Input.mousePosition;
             Ray ray = camera.ScreenPointToRay(mousePos);
@@ -174,7 +174,7 @@ namespace ArTiX
             return hit.point;
         }
 
-        public static Vector3 GetMousePosition3D(Cursor cursor) => GetMousePosition3D(cursor, Camera.main);
+        public static Vector3 GetMousePosition3D() => GetMousePosition3D(Camera.main);
     }
 }
 
