@@ -47,12 +47,23 @@ namespace Com.ArTiX.FactoryGame
                     PlaceableBuilding lCurrentBuilding = pHit.collider.GetComponentInParent<PlaceableBuilding>();
                     if (lCurrentBuilding != currentlyCheckedBuilding)
                     {
-                        currentlyCheckedBuilding = lCurrentBuilding;
-                        MeshRenderer[] lMeshRenderers = currentlyCheckedBuilding.GetComponentsInChildren<MeshRenderer>();
-                        int lNbRenderers = lMeshRenderers.Length;
-                        currentlyCheckedBuldingMats = new Material[lNbRenderers];
+                        MeshRenderer[] lMeshRenderers;
+                        int lNbRenderer;
 
-                        for (int i = 0; i < lNbRenderers; i++)
+                        if (currentlyCheckedBuilding != null)
+                        {
+                            lMeshRenderers = GetCurrentBuildingMeshRenderers(out lNbRenderer);
+
+                            for (int i = 0; i < lNbRenderer; i++)
+                                lMeshRenderers[i].material = currentlyCheckedBuldingMats[i];
+                        }
+
+                        // This variable must be assigned before calling GetCurrentBuildingMeshRenderers
+                        currentlyCheckedBuilding = lCurrentBuilding;
+                        lMeshRenderers = GetCurrentBuildingMeshRenderers(out lNbRenderer);
+                        currentlyCheckedBuldingMats = new Material[lNbRenderer];
+
+                        for (int i = 0; i < lNbRenderer; i++)
                         {
                             currentlyCheckedBuldingMats[i] = lMeshRenderers[i].material;
                             lMeshRenderers[i].material = mat_CannotBuild;
@@ -61,16 +72,21 @@ namespace Com.ArTiX.FactoryGame
                 }
                 else if (currentlyCheckedBuilding != null)
                 {
-                    MeshRenderer[] lMeshRenderers = currentlyCheckedBuilding.GetComponentsInChildren<MeshRenderer>();
-                    int lNbRenderer = lMeshRenderers.Length;
+                    MeshRenderer[] lMeshRenderers = GetCurrentBuildingMeshRenderers(out int pNbRenderer);
 
-                    for (int i = 0; i < lNbRenderer; i++)
-                    {
+                    for (int i = 0; i < pNbRenderer; i++)
                         lMeshRenderers[i].material = currentlyCheckedBuldingMats[i];
-                    }
+
                     currentlyCheckedBuilding = null;
                 }
             }
+        }
+
+        private MeshRenderer[] GetCurrentBuildingMeshRenderers(out int pNbRenderer)
+        {
+            MeshRenderer[] lMeshRenderers = currentlyCheckedBuilding.GetComponentsInChildren<MeshRenderer>();
+            pNbRenderer = lMeshRenderers.Length;
+            return lMeshRenderers;
         }
 
         #region Create Building
@@ -84,10 +100,19 @@ namespace Com.ArTiX.FactoryGame
                     position: gridSystem.GetCellPosition(pX, pY),
                     rotation: Quaternion.Euler(0, GetRealWorldRotation(), 0));
 
-                lBuilding.SetOccupiedCells(pX, pY, currentRotation);
+                // Set the cells in the building AND in the grid.
+                Vector2Int[] lCells = pBuildingData.GetCells(currentRotation);
+                Vector2Int lSpawningCell = new Vector2Int(pX, pY);
+                int lNbCell = lCells.Length;
+                Vector2Int[] lOccupiedCells = new Vector2Int[lNbCell];
 
-                foreach (Vector2Int lOccupiedCell in lBuilding.GetOccupiedCells())
-                    gridSystem.SetGridObject(lOccupiedCell.x, lOccupiedCell.y, lBuilding);
+                for (byte i = 0; i < lNbCell; i++)
+                {
+                    lOccupiedCells[i] = lSpawningCell + lCells[i];
+                    gridSystem.SetGridObject(lOccupiedCells[i].x, lOccupiedCells[i].y, lBuilding);
+                }
+
+                lBuilding.SetOccupiedCells(lOccupiedCells);
             }
         }
 
@@ -140,8 +165,12 @@ namespace Com.ArTiX.FactoryGame
 
         public void ExitBuildingMode()
         {
-            Destroy(buildingGhost.gameObject);
-            buildingGhost = null;
+            if (buildingGhost != null)
+            {
+                Destroy(buildingGhost.gameObject);
+                buildingGhost = null;
+            }
+
             currentRotation = EBuildingRotation.Forward;
 
             InputManager.Instance.DisableInput(InputManager.EAction.SpawnBuilding);
