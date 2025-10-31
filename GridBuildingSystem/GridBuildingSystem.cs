@@ -111,7 +111,6 @@ namespace Com.ArTiX.FactoryGame
                     lOccupiedCells[i] = lSpawningCell + lCells[i];
                     gridSystem.SetGridObject(lOccupiedCells[i].x, lOccupiedCells[i].y, lBuilding);
                 }
-
                 lBuilding.SetOccupiedCells(lOccupiedCells);
             }
         }
@@ -132,15 +131,18 @@ namespace Com.ArTiX.FactoryGame
 
         private void DestroyBuilding(InputAction.CallbackContext pContext)
         {
-            Vector3 lMousePosition = Utilities.GetMousePosition3D();
-            if (gridSystem.IsPositionWithinGrid(lMousePosition))
+            Ray lRay = Camera.main.ScreenPointToRay(Input.mousePosition);
+            if (Physics.Raycast(lRay, out RaycastHit hit, 500, buildingLayer))
             {
-                PlaceableBuilding lBuilding = gridSystem.GetGridObject(Utilities.GetMousePosition3D());
-                if (lBuilding != null)
+                if (gridSystem.IsPositionWithinGrid(hit.collider.transform.position))
                 {
-                    gridSystem.SetGridObject(lBuilding.GetOccupiedCells(), null);
-                    Destroy(lBuilding.gameObject);
-                    ExitDestructionMode();
+                    PlaceableBuilding lBuilding = gridSystem.GetGridObject(hit.collider.transform.position);
+                    if (lBuilding != null)
+                    {
+                        gridSystem.SetGridObject(lBuilding.GetOccupiedCells(), null);
+                        Destroy(lBuilding.gameObject);
+                        ExitDestructionMode();
+                    }
                 }
             }
         }
@@ -158,7 +160,7 @@ namespace Com.ArTiX.FactoryGame
             InputManager.Instance.EnableInput(InputManager.EAction.SpawnBuilding);
             InputManager.Instance.AssignInput(InputManager.EAction.SpawnBuilding, CreateBuilding, InputManager.EventType.Started);
             InputManager.Instance.EnableInput(InputManager.EAction.Rotate);
-            InputManager.Instance.AssignInput(InputManager.EAction.Rotate, Rotate, InputManager.EventType.Started);
+            InputManager.Instance.AssignInput(InputManager.EAction.Rotate, RotateBuilding, InputManager.EventType.Started);
             InputManager.Instance.EnableInput(InputManager.EAction.ExitBuildingMode);
             InputManager.Instance.AssignInput(InputManager.EAction.ExitBuildingMode, ExitBuildingMode, InputManager.EventType.Started);
         }
@@ -176,7 +178,7 @@ namespace Com.ArTiX.FactoryGame
             InputManager.Instance.DisableInput(InputManager.EAction.SpawnBuilding);
             InputManager.Instance.UnassignInput(InputManager.EAction.SpawnBuilding, CreateBuilding, InputManager.EventType.Started);
             InputManager.Instance.DisableInput(InputManager.EAction.Rotate);
-            InputManager.Instance.UnassignInput(InputManager.EAction.Rotate, Rotate, InputManager.EventType.Started);
+            InputManager.Instance.UnassignInput(InputManager.EAction.Rotate, RotateBuilding, InputManager.EventType.Started);
             InputManager.Instance.DisableInput(InputManager.EAction.ExitBuildingMode);
             InputManager.Instance.UnassignInput(InputManager.EAction.ExitBuildingMode, ExitBuildingMode, InputManager.EventType.Started);
         }
@@ -224,7 +226,7 @@ namespace Com.ArTiX.FactoryGame
 
         private bool CanBuild(in int pX, in int pY) => CanBuild(pX, pY, currentBuildingData);
 
-        private void Rotate(InputAction.CallbackContext pContext)
+        private void RotateBuilding(InputAction.CallbackContext pContext)
         {
             switch (currentRotation)
             {
