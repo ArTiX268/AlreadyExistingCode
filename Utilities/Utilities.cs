@@ -180,15 +180,22 @@ namespace ArTiX
 
 public static class ArrayExtension
 {
-    public static bool Contains<T>(this Array array, T element) => Array.IndexOf(array, element) >= 0;
+    public static bool Contains<T>(this T[] array, T element) => Array.IndexOf(array, element) >= 0;
 
-    public static bool CheckIfContainsIndex(this Array array, uint index) => index < array.Length;
-
-    public static bool TryGetFirstEmptyElement<T>(this Array array, out int firstEmptyIndex) where T : class
+    public static bool TryGetFirstEmptyElement<T>(this T[] array, out int firstEmptyIndex)
     {
         firstEmptyIndex = Array.IndexOf(array, null);
 
         return firstEmptyIndex >= 0;
+    }
+
+    public static List<T> ConvertToList<T>(this T[] array)
+    {
+        List<T> list = new List<T>();
+
+        foreach (T element in array) list.Add(element);
+
+        return list;
     }
 }
 
