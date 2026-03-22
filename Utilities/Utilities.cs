@@ -26,11 +26,12 @@ namespace ArTiX
 
         private static void CalculateCornerPositionsXY(out Vector3[,] corners, float size, float width, float height)
         {
+            float halfSize = size * 0.5f;
             corners = new Vector3[2, 2];
-            corners[0, 0] = new Vector2(width, height);
-            corners[1, 0] = new Vector2(width + size, height);
-            corners[0, 1] = new Vector2(width, height + size);
-            corners[1, 1] = new Vector2(width + size, height + size);
+            corners[0, 0] = new Vector2(width - halfSize, height - halfSize);
+            corners[1, 0] = new Vector2(width + halfSize, height - halfSize);
+            corners[0, 1] = new Vector2(width - halfSize, height + halfSize);
+            corners[1, 1] = new Vector2(width + halfSize, height + halfSize);
         }
 
         public static void DrawSquareXZ(Vector3 squareMiddleWorldPos, float size, Color color, float duration)
@@ -42,27 +43,12 @@ namespace ArTiX
 
         private static void CalculateCornerPositionsXZ(out Vector3[,] corners, float size, float width, float height)
         {
+            float halfSize = size * 0.5f;
             corners = new Vector3[2, 2];
-            corners[0, 0] = new Vector3(width, 0, height);
-            corners[1, 0] = new Vector3(width + size, 0, height);
-            corners[0, 1] = new Vector3(width, 0, height + size);
-            corners[1, 1] = new Vector3(width + size, 0, height + size);
-        }
-
-        public static void DrawSquareYZ(Vector3 squareMiddleWorldPos, float size, Color color, float duration)
-        {
-            CalculateCornerPositionsYZ(out Vector3[,] corners, size, squareMiddleWorldPos.y, squareMiddleWorldPos.z);
-
-            DrawSquareLines(corners, color, duration);
-        }
-
-        private static void CalculateCornerPositionsYZ(out Vector3[,] corners, float size, float width, float height)
-        {
-            corners = new Vector3[2, 2];
-            corners[0, 0] = new Vector3(0, width, height);
-            corners[1, 0] = new Vector3(0, width + size, height);
-            corners[0, 1] = new Vector3(0, width, height + size);
-            corners[1, 1] = new Vector3(0, width + size, height + size);
+            corners[0, 0] = new Vector3(width - halfSize, 0, height - halfSize);
+            corners[1, 0] = new Vector3(width + halfSize, 0, height - halfSize);
+            corners[0, 1] = new Vector3(width - halfSize, 0, height + halfSize);
+            corners[1, 1] = new Vector3(width + halfSize, 0, height + halfSize);
         }
 
         private static void DrawSquareLines(Vector3[,] corners, Color color, float duration)
@@ -124,7 +110,7 @@ namespace ArTiX
         {
             Vector2 randomPointInUnitCircle = UnityEngine.Random.insideUnitCircle * radius;
             Quaternion rotation = Quaternion.FromToRotation(Vector3.forward, normal);
-            return center + (rotation * randomPointInUnitCircle);
+            return center + rotation * randomPointInUnitCircle;
         }
 
         /// <summary>
@@ -227,13 +213,13 @@ public static class TransformExtension
 
     public static Vector3 SelfToTransformVector(this Transform transform, Transform other, bool normalized)
     {
-        Vector3 vector = (other.position - transform.position);
+        Vector3 vector = other.position - transform.position;
         return normalized ? vector.normalized : vector;
     }
 
     public static Vector3 TransformToSelfVector(this Transform transform, Transform other, bool normalized)
     {
-        Vector3 vector = (transform.position - other.position);
+        Vector3 vector = transform.position - other.position;
         return normalized ? vector.normalized : vector;
     }
 }

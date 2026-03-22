@@ -15,18 +15,6 @@ public class InputManager : MonoBehaviour
     public enum EAction : ushort
     {
         Move,
-        Look,
-        Jump,
-        Run,
-        Aiming,
-        Zoom,
-        Crouch,
-        Prone,
-        Interact,
-        Drop,
-        Shoot,
-        Reload,
-        SelectInventorySlot
     }
 
     public static InputManager Instance { get; private set; }
@@ -36,18 +24,6 @@ public class InputManager : MonoBehaviour
 
     // Actions
     private InputAction moveAction;
-    private InputAction jumpAction;
-    private InputAction lookAction;
-    private InputAction crouchAction;
-    private InputAction proneAction;
-    private InputAction runAction;
-    private InputAction amingAction;
-    private InputAction zoomAction;
-    private InputAction interactAction;
-    private InputAction dropAction;
-    private InputAction shootAction;
-    private InputAction reloadAction;
-    private InputAction selectInventorySlot;
 
     private void Awake()
     {
@@ -59,47 +35,11 @@ public class InputManager : MonoBehaviour
 
     private void OnEnable()
     {
-        moveAction          = inputActionScript.Player.Movement;
-        jumpAction          = inputActionScript.Player.Jump;
-        lookAction          = inputActionScript.Player.Look;
-        crouchAction        = inputActionScript.Player.Crouch;
-        proneAction         = inputActionScript.Player.Prone;
-        runAction           = inputActionScript.Player.Run;
-        amingAction         = inputActionScript.Player.Aiming;
-        zoomAction          = inputActionScript.Player.Zoom;
-        interactAction      = inputActionScript.Player.Interact;
-        dropAction          = inputActionScript.Player.Drop;
-        shootAction         = inputActionScript.Player.Shoot;
-        reloadAction        = inputActionScript.Player.Reload;
-        selectInventorySlot = inputActionScript.Player.SelectSlot;
+        moveAction = inputActionScript.Player.Movement;
 
-        moveAction         .Enable();
-        jumpAction         .Enable();
-        lookAction         .Enable();
-        crouchAction       .Enable();
-        proneAction        .Enable();
-        runAction          .Enable();
-        amingAction        .Enable();
-        zoomAction         .Enable();
-        interactAction     .Enable();
-        dropAction         .Enable();
-        shootAction        .Enable();
-        reloadAction       .Enable();
-        selectInventorySlot.Enable();
+        moveAction.Enable();
 
-        inputActions.Add(EAction.Move,                moveAction);
-        inputActions.Add(EAction.Jump,                jumpAction);
-        inputActions.Add(EAction.Look,                lookAction);
-        inputActions.Add(EAction.Run,                 runAction);
-        inputActions.Add(EAction.Aiming,              amingAction);
-        inputActions.Add(EAction.Zoom,                zoomAction);
-        inputActions.Add(EAction.Crouch,              crouchAction);
-        inputActions.Add(EAction.Prone,               proneAction);
-        inputActions.Add(EAction.Interact,            interactAction);
-        inputActions.Add(EAction.Drop,                dropAction);
-        inputActions.Add(EAction.Shoot,               shootAction);
-        inputActions.Add(EAction.Reload,              reloadAction);
-        inputActions.Add(EAction.SelectInventorySlot, selectInventorySlot);
+        inputActions.Add(EAction.Move, moveAction);
     }
 
     private void OnDisable()

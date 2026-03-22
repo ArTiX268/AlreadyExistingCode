@@ -1,76 +1,66 @@
 using System;
 using UnityEngine;
 
-public class Timer
+namespace Utils
 {
-    private readonly float duration;
-    private readonly bool fixedTimer;
-    private readonly bool scaled;
-    private readonly uint repetitionNumber = 0;
-
-    private bool isActive;
-    private float timer;
-    private uint currentRepetitionNumber = 0;
-
-    public event Action FinishedEvent;
-
-    public Timer(float duration, bool fixedTimer = false, bool scaled = true, uint repetitionNumber = 0, Action finishedEvent = null)
+    public class Timer : MonoBehaviour
     {
-        this.duration = duration;
-        this.fixedTimer = fixedTimer;
-        this.scaled = scaled;
-        this.repetitionNumber = repetitionNumber;
-        this.currentRepetitionNumber = repetitionNumber;
+        public bool IsActive { get; private set; }
+        public float TimerValue { get; private set; }
 
-        FinishedEvent += finishedEvent;
-    }
+        private float duration;
+        private bool scaled;
+        private uint repetitionNumber = 0;
 
-    private float GetIncrementation() => fixedTimer ?
-        (scaled ? Time.fixedDeltaTime : Time.fixedUnscaledDeltaTime) :
-        (scaled ? Time.deltaTime : Time.unscaledDeltaTime);
+        private uint currentRepetitionNumber = 0;
 
-    public void IncrementTimer()
-    {
-        void FinishTimer()
+        public event Action FinishedEvent;
+
+        public static Timer Create(float duration, bool scaled = true, uint repetitionNumber = 0, Action finishedEvent = null, string name = "Timer")
         {
-            if (currentRepetitionNumber > 0)
-                currentRepetitionNumber--;
+            Timer timer = new GameObject().AddComponent(typeof(Timer)) as Timer;
+            timer.gameObject.name = name;
 
-            StopTimer();
+            timer.duration = duration;
+            timer.scaled = scaled;
+            timer.repetitionNumber = repetitionNumber;
+            timer.FinishedEvent = finishedEvent;
 
-            timer = 0;
-            FinishedEvent?.Invoke();
+            return timer;
         }
 
-        if (isActive && currentRepetitionNumber >= 0)
+        private void Update()
         {
-            timer += GetIncrementation();
-
-            if (timer > duration)
+            if (IsActive && currentRepetitionNumber >= 0)
             {
-                FinishTimer();
+                TimerValue += scaled ? Time.deltaTime : Time.unscaledDeltaTime;
+
+                if (TimerValue > duration)
+                {
+                    if (currentRepetitionNumber > 0)
+                        currentRepetitionNumber--;
+
+                    TimerValue = 0;
+                    FinishedEvent?.Invoke();
+                }
             }
         }
+
+        public void StartTimer() => IsActive = true;
+
+        public void StartTimerAtTheBeginning()
+        {
+            StopTimer();
+            StartTimer();
+        }
+
+        public void PauseTimer() => IsActive = false;
+
+        public void StopTimer()
+        {
+            currentRepetitionNumber = repetitionNumber;
+            IsActive = false;
+            TimerValue = 0;
+        }
     }
-
-    public void StartTimer() => isActive = true;
-
-    public void StartTimerAtTheBeginning()
-    {
-        StopTimer();
-        StartTimer();
-    }
-
-    public void PauseTimer() => isActive = false;
-
-    public void StopTimer()
-    {
-        currentRepetitionNumber = repetitionNumber;
-        isActive = false;
-        timer = 0;
-    }
-
-    public bool IsActive() => isActive;
-
-    public float GetTime() => timer;
 }
