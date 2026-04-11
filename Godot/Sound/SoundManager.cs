@@ -27,15 +27,7 @@ namespace Com.IsartDigital.Sokoban
         //Sfx
         private static readonly Dictionary<ESoundType, List<AudioStream>> sfxs = new Dictionary<ESoundType, List<AudioStream>>
         {
-            { ESoundType.SlotMachine, Utils.GetAllFilesOfTypeInDir<AudioStream>("res://Assets/Audio/SFX/CasinoSounds/SlotMachine/") },
             { ESoundType.UI_Click, Utils.GetAllFilesOfTypeInDir<AudioStream>("res://Assets/Audio/SFX/UI/Clicks/") },
-            { ESoundType.CardSlide, Utils.GetAllFilesOfTypeInDir<AudioStream>("res://Assets/Audio/SFX/CasinoSounds/CardSlide/") },
-            { ESoundType.CardShove, Utils.GetAllFilesOfTypeInDir<AudioStream>("res://Assets/Audio/SFX/CasinoSounds/CardShove/") },
-            { ESoundType.Token, Utils.GetAllFilesOfTypeInDir<AudioStream>("res://Assets/Audio/SFX/CasinoSounds/Token/") },
-            { ESoundType.Dice, Utils.GetAllFilesOfTypeInDir<AudioStream>("res://Assets/Audio/SFX/CasinoSounds/Dice/") },
-            { ESoundType.Footsteps, Utils.GetAllFilesOfTypeInDir<AudioStream>("res://Assets/Audio/SFX/Footsteps/") },
-            { ESoundType.FallingChips, Utils.GetAllFilesOfTypeInDir<AudioStream>("res://Assets/Audio/SFX/CasinoSounds/FallingToken/") },
-            { ESoundType.SlotMachineButtons, Utils.GetAllFilesOfTypeInDir<AudioStream>("res://Assets/Audio/SFX/CasinoSounds/SlotMachine/Buttons/") },
         };
 
         private static readonly PackedScene scnSoundManager = ResourceLoader.Load<PackedScene>("res://Scenes/SoundManager.tscn");
