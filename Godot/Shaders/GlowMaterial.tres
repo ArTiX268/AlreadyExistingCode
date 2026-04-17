@@ -1,0 +1,10 @@
+[gd_resource type="ShaderMaterial" load_steps=2 format=3 uid="uid://cqd81e5jjq67y"]
+
+[ext_resource type="Shader" path="res://Assets/Shaders/CardHover/Glow.gdshader" id="1_mgtp4"]
+
+[resource]
+shader = ExtResource("1_mgtp4")
+shader_parameter/minBrightness = 0.2
+shader_parameter/minGlowStrength = 1.1
+shader_parameter/maxGlowStrength = 1.9
+shader_parameter/speed = 1.0
