@@ -1,5 +1,5 @@
-using ArTiX;
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace ArTiX
@@ -162,108 +162,148 @@ namespace ArTiX
 
         public static Vector3 GetMousePosition3D() => GetMousePosition3D(Camera.main);
     }
-}
 
-public static class ArrayExtension
-{
-    public static bool Contains<T>(this T[] array, T element) => Array.IndexOf(array, element) >= 0;
+    #region Class Extension
 
-    public static bool TryGetFirstEmptyElement<T>(this T[] array, out int firstEmptyIndex)
+    public static class ArrayExtension
     {
-        firstEmptyIndex = Array.IndexOf(array, null);
+        public static bool Contains<T>(this T[] array, T element) => Array.IndexOf(array, element) >= 0;
 
-        return firstEmptyIndex >= 0;
-    }
-
-    public static List<T> ConvertToList<T>(this T[] array)
-    {
-        List<T> list = new List<T>();
-
-        foreach (T element in array) list.Add(element);
-
-        return list;
-    }
-}
-
-public static class TransformExtension
-{
-    public static Vector3 GetTrueScale(this Transform transform)
-    {
-        Vector3 trueScale = Vector3.one;
-
-        void UpdateTrueScale(Transform _transform)
+        public static bool TryGetFirstEmptyElement<T>(this T[] array, out int firstEmptyIndex)
         {
-            trueScale.x *= _transform.localScale.x;
-            trueScale.y *= _transform.localScale.y;
-            trueScale.z *= _transform.localScale.z;
+            firstEmptyIndex = Array.IndexOf(array, null);
+
+            return firstEmptyIndex >= 0;
         }
 
-        UpdateTrueScale(transform);
-
-        Transform parentTransform = transform.parent;
-
-        while (parentTransform != null)
+        public static List<T> ConvertToList<T>(this T[] array)
         {
-            UpdateTrueScale(parentTransform);
-            parentTransform = parentTransform.parent;
+            List<T> list = new List<T>();
+
+            foreach (T element in array) list.Add(element);
+
+            return list;
+        }
+    }
+
+    public static class TransformExtension
+    {
+        public static Vector3 GetTrueScale(this Transform transform)
+        {
+            Vector3 trueScale = Vector3.one;
+
+            void UpdateTrueScale(Transform _transform)
+            {
+                trueScale.x *= _transform.localScale.x;
+                trueScale.y *= _transform.localScale.y;
+                trueScale.z *= _transform.localScale.z;
+            }
+
+            UpdateTrueScale(transform);
+
+            Transform parentTransform = transform.parent;
+
+            while (parentTransform != null)
+            {
+                UpdateTrueScale(parentTransform);
+                parentTransform = parentTransform.parent;
+            }
+
+            return trueScale;
         }
 
-        return trueScale;
+        public static Vector3 SelfToTransformVector(this Transform transform, Transform other, bool normalized)
+        {
+            Vector3 vector = other.position - transform.position;
+            return normalized ? vector.normalized : vector;
+        }
+
+        public static Vector3 TransformToSelfVector(this Transform transform, Transform other, bool normalized)
+        {
+            Vector3 vector = transform.position - other.position;
+            return normalized ? vector.normalized : vector;
+        }
     }
 
-    public static Vector3 SelfToTransformVector(this Transform transform, Transform other, bool normalized)
+    public static class VectorExtension
     {
-        Vector3 vector = other.position - transform.position;
-        return normalized ? vector.normalized : vector;
+        public static Vector3 PutVectorOnXZPlane(this Vector3 vector) => new Vector3(vector.x, 0, vector.z);
+
+        public static Vector3 PutVectorOnZYPlane(this Vector3 vector) => new Vector3(0, vector.x, vector.z);
+
+        public static Vector3 AddVector2(this Vector3 vector, Vector2 v)
+        {
+            vector.x += v.x;
+            vector.y += v.y;
+            return vector;
+        }
+
+        /// <summary>
+        /// The functions directly applies on the vector it's called on.
+        /// </summary>
+        /// <param name="vector"></param>
+        /// <param name="angle">Must be in radians.</param>
+        /// <returns></returns>
+        public static Vector2 RotateVector(this Vector2 vector, float angle)
+        {
+            vector.x = vector.x * Mathf.Cos(angle) - vector.y * Mathf.Sin(angle);
+            vector.y = vector.x * Mathf.Sin(angle) + vector.y * Mathf.Cos(angle);
+            return vector;
+        }
+
+        public static Vector2 Abs(this Vector3 vector)
+        {
+            Vector3 newVector = vector;
+            newVector.x = Mathf.Abs(vector.x);
+            newVector.y = Mathf.Abs(vector.y);
+            newVector.z = Mathf.Abs(vector.z);
+            return newVector;
+        }
+        public static Vector2 Abs(this Vector2 vector)
+        {
+            Vector3 newVector = vector;
+            newVector.x = Mathf.Abs(vector.x);
+            newVector.y = Mathf.Abs(vector.y);
+            return newVector;
+        }
     }
 
-    public static Vector3 TransformToSelfVector(this Transform transform, Transform other, bool normalized)
+    public static class CameraExtension
     {
-        Vector3 vector = transform.position - other.position;
-        return normalized ? vector.normalized : vector;
+        public static Vector3 GetPointInFrontOfCamera(this Camera camera, float distance = 1)
+        {
+            Vector3 cameraPosition = camera.transform.position;
+            Vector3 cameraForward = camera.transform.forward * distance;
+            return cameraPosition + cameraForward;
+        }
     }
-}
 
-public static class Vector3Extension
-{
-    public static Vector3 PutVectorOnXZPlane(this Vector3 vector) => new Vector3(vector.x, 0, vector.z);
-
-    public static Vector3 PutVectorOnZYPlane(this Vector3 vector) => new Vector3(0, vector.x, vector.z);
-}
-
-public static class CameraExtension
-{
-    public static Vector3 GetPointInFrontOfCamera(this Camera camera, float distance = 1)
+    public static class BoxCollider2DExtension
     {
-        Vector3 cameraPosition = camera.transform.position;
-        Vector3 cameraForward = camera.transform.forward * distance;
-        return cameraPosition + cameraForward;
-    }
-}
+        public static Vector2 GetRandomPointWithinBoxCollider2D(this BoxCollider2D collider2D)
+        {
+            Vector3 objectScale = collider2D.transform.GetTrueScale();
 
-public static class BoxCollider2DExtension
-{
-    public static Vector2 GetRandomPointWithinBoxCollider2D(this BoxCollider2D collider2D)
+            return MyRandom.GetRandomPointWithinSquare(
+                collider2D.size.x * objectScale.x,
+                collider2D.size.y * objectScale.y,
+                collider2D.transform.position);
+        }
+    }
+
+    public static class BoxColliderExtension
     {
-        Vector3 objectScale = collider2D.transform.GetTrueScale();
+        public static Vector3 GetRandomPointWithinBoxCollider(this BoxCollider collider)
+        {
+            Vector3 objectScale = collider.transform.GetTrueScale();
 
-        return MyRandom.GetRandomPointWithinSquare(
-            collider2D.size.x * objectScale.x,
-            collider2D.size.y * objectScale.y,
-            collider2D.transform.position);
+            return MyRandom.GetRandomPointWithinCube(
+                collider.size.x * objectScale.x,
+                collider.size.y * objectScale.y,
+                collider.size.z * objectScale.z,
+                collider.transform.position);
+        }
     }
-}
 
-public static class BoxColliderExtension
-{
-    public static Vector3 GetRandomPointWithinBoxCollider(this BoxCollider collider)
-    {
-        Vector3 objectScale = collider.transform.GetTrueScale();
-
-        return MyRandom.GetRandomPointWithinCube(
-            collider.size.x * objectScale.x,
-            collider.size.y * objectScale.y,
-            collider.size.z * objectScale.z,
-            collider.transform.position);
-    }
+    #endregion
 }
