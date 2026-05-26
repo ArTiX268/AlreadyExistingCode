@@ -20,6 +20,7 @@ namespace ArTiX.Effects
 
         [Header("Parameters")]
         [SerializeField] private Vector2 amplitude = Vector2.one * 5f;
+        [SerializeField, Range(0, 1)] public float amplitudeCoef = 1;
         [SerializeField, Range(0.0001f, 0.1f)] private float step = 0.048f;
         [SerializeField, Range(0, 360), Tooltip("It's an angle")] private float minNoise = 15f;
         [SerializeField, Range(0, 360), Tooltip("It's an angle")] private float maxNoise = 15f;
@@ -43,6 +44,7 @@ namespace ArTiX.Effects
         private List<Target> targetsDatas = new List<Target>();
 
         private float intensity;
+        private Vector2 Amplitude => amplitude * intensity * amplitudeCoef;
 
         private float elapsedTime = 0;
         private float stepElapsedTime = 0;
@@ -178,8 +180,8 @@ namespace ArTiX.Effects
             float angle = Vector2.Angle(Vector2.right, new Vector2(current.x - origin.x, current.y - origin.y).normalized) + noise;
             Vector2 next = Utilities.VectorFromAngle(angle);
 
-            next.x *= amplitude.x;
-            next.y *= amplitude.y;
+            next.x *= Amplitude.x;
+            next.y *= Amplitude.y;
 
             return (Vector2)origin + next;
         }

@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace ArTiX
+namespace ArTiX.Utils
 {
     public class Utilities
     {
@@ -13,6 +13,9 @@ namespace ArTiX
 
             return new(x_Center, y_Center);
         }
+
+        public static Vector2 VectorFromAngle(in float angle, float magnitude = 1)
+            => new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * magnitude;
     }
 
     public class MyDebug
@@ -110,7 +113,7 @@ namespace ArTiX
         {
             Vector2 randomPointInUnitCircle = UnityEngine.Random.insideUnitCircle * radius;
             Quaternion rotation = Quaternion.FromToRotation(Vector3.forward, normal);
-            return center + rotation * randomPointInUnitCircle;
+            return center + (rotation * randomPointInUnitCircle);
         }
 
         /// <summary>
@@ -246,8 +249,8 @@ namespace ArTiX
         /// <returns></returns>
         public static Vector2 RotateVector(this Vector2 vector, float angle)
         {
-            vector.x = vector.x * Mathf.Cos(angle) - vector.y * Mathf.Sin(angle);
-            vector.y = vector.x * Mathf.Sin(angle) + vector.y * Mathf.Cos(angle);
+            vector.x = (vector.x * Mathf.Cos(angle)) - (vector.y * Mathf.Sin(angle));
+            vector.y = (vector.x * Mathf.Sin(angle)) + (vector.y * Mathf.Cos(angle));
             return vector;
         }
 
