@@ -7,8 +7,8 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: mat_Shockwave
-  m_Shader: {fileID: 4800000, guid: 482eae8c22aca35499c4b03c5d59ac18, type: 3}
+  m_Name: mat_LensDistortion
+  m_Shader: {fileID: 4800000, guid: c2207ea27bd71514bb19251f43d18c4c, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -29,11 +29,13 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _Radius: 0.384
-    - _Width: 0.057
+    - _LineNumber: 10
+    - _LineSpeed: 2
+    - _LineWidth: 0.0012
+    - _Strength: 1
+    - _Threshold: 1.5
+    - _Zoom: 1
     m_Colors:
-    - _Aspect: {r: 1, g: 1, b: 0, a: 0}
-    - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
-    - _Center: {r: 0.45, g: 0.54, b: 0, a: 0}
+    - _LineColor: {r: 0.01, g: 0.01, b: 0.01, a: 0.01}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

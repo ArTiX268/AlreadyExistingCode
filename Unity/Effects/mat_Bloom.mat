@@ -7,8 +7,8 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: mat_Shockwave
-  m_Shader: {fileID: 4800000, guid: 482eae8c22aca35499c4b03c5d59ac18, type: 3}
+  m_Name: mat_Bloom
+  m_Shader: {fileID: 4800000, guid: 433a36a95627b834c8093b30756568e1, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -29,11 +29,11 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _Radius: 0.384
-    - _Width: 0.057
+    - _Brightness: 5.81
+    - _Threshold: 0.536
     m_Colors:
-    - _Aspect: {r: 1, g: 1, b: 0, a: 0}
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
-    - _Center: {r: 0.45, g: 0.54, b: 0, a: 0}
+    - _BloomColor: {r: 1, g: 0.7544832, b: 0, a: 1}
+    - _Color: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
