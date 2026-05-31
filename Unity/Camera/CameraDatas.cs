@@ -12,20 +12,15 @@ public class CameraDatas : ScriptableObject
     [Header("Smooth")]
     public bool smoothX;
     public bool smoothY;
-    [Min(0)] public float xSmoothSpeed;
-    [Min(0)] public float ySmoothSpeed;
-
-    [Header("Lock")]
-    public bool allowLockX;
-    public bool allowLockY;
+    public float distanceThreshold = 0.1f;
+    public Vector2 minSmoothSpeed;
+    public Vector2 maxSmoothSpeed;
+    public Tween.AnimParams reachingMaxSmoothSpeedAnim;
 
     [Header("Zoom")]
     [Range(0.5f, 3f)] public float minZoom = 1;
     [Range(0.5f, 6f)] public float maxZoom = 1;
     [Tooltip("Do not use the Arch transitions otherwise you won't reach your target value.")] public Tween.AnimParams zoomAnim;
-
-    [Header("InfluencePoints")]
-    [Tooltip("Using influence points will override the box limits.")] public bool useInfluencePoints;
 
     [Header("BoxLimits")]
     [Tooltip("If true, the camera will move only if the target is outside the bounds of the box")] public bool usesBoxLimits;
