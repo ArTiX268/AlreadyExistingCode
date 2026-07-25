@@ -1,4 +1,6 @@
+using ArTiX.Effects.Tween;
 using ArTiX.Utils;
+using Noise;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -6,63 +8,42 @@ namespace ArTiX.Effects
 {
     public class Shaker : MonoBehaviour
     {
-        private class Target
+        private struct TargetData
         {
             public Transform target;
             public Vector3 origin;
-            public Vector3 current;
-            public Vector3 next;
+            public float originAngle;
         }
 
         #region Variables
 
-        [SerializeField] private Transform[] targets;
+        [SerializeField] private List<Transform> targets;
 
         [Header("Parameters")]
         [SerializeField] private Vector2 amplitude = Vector2.one * 5f;
-        [SerializeField, Range(0, 1)] public float amplitudeCoef = 1;
-        [SerializeField, Range(0.0001f, 0.1f)] private float step = 0.048f;
-        [SerializeField, Range(0, 360), Tooltip("It's an angle")] private float minNoise = 15f;
-        [SerializeField, Range(0, 360), Tooltip("It's an angle")] private float maxNoise = 15f;
-        [SerializeField] private bool influencedByTimeScale;
+        [SerializeField, Tooltip("To shake the angle")] private float maxAngle = 0;
+        [SerializeField] private float jitteriness = 1;
+        [SerializeField] private bool timeScaled = true;
 
-        [Header("Attack")]
-        [SerializeField, Tooltip("The time it takes to reach maximum intensity. Is before duration.")] private float attackDuration = 0.25f;
-        [SerializeField] private Tween.ETransition attackTrans = Tween.ETransition.Sine;
-        [SerializeField] private Tween.EEasing attackEase = Tween.EEasing.InOut;
+        [Header("Anim")]
+        [SerializeField, Tooltip("Anim to reach max intensity.")] private Tween.MasterTween.AnimParams attackParams;
+        [SerializeField, Tooltip("How much time the shake will be active at full intensity.")] private float holdDuration;
+        [SerializeField, Tooltip("Anim to reach 0 intensity.")] private Tween.MasterTween.AnimParams releaseParams;
 
-        [Header("Shaking")]
-        [SerializeField] private float shakeDuration = 2f;
-        [SerializeField] private Tween.ETransition shakeTransition = Tween.ETransition.Quad;
-        [SerializeField] private Tween.EEasing shakeEasing = Tween.EEasing.InOut;
+        private readonly List<TargetData> targetsDatas = new List<TargetData>();
 
-        [Header("Release")]
-        [SerializeField, Tooltip("The time it takes to stop shaking. Is after duration.")] private float releaseDuration = 0.25f;
-        [SerializeField] private Tween.ETransition releaseTransition = Tween.ETransition.Sine;
-        [SerializeField] private Tween.EEasing releaseEase = Tween.EEasing.InOut;
-
-        private List<Target> targetsDatas = new List<Target>();
+        private float intensityCoef = 1;
 
         private float intensity;
-        private Vector2 Amplitude => amplitude * intensity * amplitudeCoef;
 
-        private float elapsedTime = 0;
-        private float stepElapsedTime = 0;
+        private Vector2 Amplitude => amplitude * (intensity * intensityCoef);
+        private float Angle => maxAngle * intensity * intensityCoef;
+        public bool IsPlaying => intensity > 0;
 
-        private delegate void DoShaker(float deltaTime);
-        private DoShaker doShake;
-        /// <summary>
-        /// Setting this resets the elapsed time.
-        /// </summary>
-        private DoShaker DoShake
-        {
-            get => doShake;
-            set
-            {
-                doShake = value;
-                elapsedTime = 0;
-            }
-        }
+        private MasterTween.Tween intensityTween;
+        private MasterTween.Tween intensityCoefTween;
+
+        private Vector2 currentOffset = Vector2.zero;
 
         #endregion
 
@@ -73,117 +54,142 @@ namespace ArTiX.Effects
             {
                 if (target != null) newTargets.Add(target);
             }
-            targets = newTargets.ToArray();
+            targets = newTargets;
+
+            amplitude = amplitude.Abs();
         }
 
         private void Update()
         {
-            if (doShake != null)
+            if (intensity > 0 && targetsDatas.Count > 0)
             {
-                float delta = influencedByTimeScale ? Time.deltaTime : Time.unscaledDeltaTime;
-                doShake.Invoke(delta);
-
-                stepElapsedTime = Mathf.Clamp(stepElapsedTime + delta, 0, step);
                 int nbTarget = targetsDatas.Count;
-                Vector2 newPos;
+                FastNoise xNoise;
+                FastNoise yNoise;
+                FastNoise angleNoise;
 
+                float offsetX;
+                float offsetY;
+                float angleOffset;
+
+                float time = timeScaled ? Time.time : Time.unscaledTime;
+                TargetData targetDatas;
                 for (int i = 0; i < nbTarget; i++)
                 {
-                    newPos = Tween.InterpolateValue(targetsDatas[i].current, targetsDatas[i].next, step, stepElapsedTime, shakeEasing, shakeTransition);
-                    targetsDatas[i].target.localPosition = new Vector3(newPos.x, newPos.y, targetsDatas[i].target.localPosition.z);
+                    xNoise = new FastNoise(i);
+                    yNoise = new FastNoise(i + 1);
+                    angleNoise = new FastNoise(i + 2);
 
-                    if (stepElapsedTime >= step)
-                    {
-                        stepElapsedTime = 0;
-                        targetsDatas[i].current = targetsDatas[i].next;
-                        targetsDatas[i].next = FindNewPos(targetsDatas[i].origin, targetsDatas[i].current);
-                    }
+                    xNoise.SetFrequency(jitteriness);
+                    yNoise.SetFrequency(jitteriness);
+                    angleNoise.SetFrequency(jitteriness);
+
+                    offsetX = Amplitude.x * xNoise.GetPerlin(time, 0);
+                    offsetY = Amplitude.y * yNoise.GetPerlin(time, 0);
+                    angleOffset = Angle * angleNoise.GetPerlin(time, 0);
+
+                    offsetX += currentOffset.x;
+                    offsetY += currentOffset.y;
+
+                    targetDatas = targetsDatas[i];
+                    targetDatas.target.SetLocalPositionAndRotation(
+                        localPosition: targetDatas.origin + new Vector3(offsetX, offsetY, 0),
+                        localRotation: Quaternion.Euler(0, 0, targetDatas.originAngle + angleOffset)
+                    );
                 }
             }
         }
 
         public void Shake()
         {
-            if (targets == null || targets.Length == 0) return;
+            if (targets?.Count == 0) return;
 
             Stop();
-
-            amplitude = amplitude.Abs();
 
             targetsDatas.Clear();
             intensity = 0f;
 
-            foreach (Transform target in targets)
+            intensityTween?.Kill();
+
+            intensityTween = Tween.MasterTween.Create("Intensity Tween");
+            intensityTween.TweenEvent(
+                startValue: 0, 
+                targetValue: 1,
+                tweenEvent: TweenIntensity, 
+                animParams: attackParams);
+            intensityTween.TweenEvent(
+                startValue: 1,
+                targetValue: 0, 
+                tweenEvent: TweenIntensity, 
+                animParams: releaseParams, 
+                delay: holdDuration);
+
+            for (int i = targets.Count - 1; i >= 0; i--)
             {
-                targetsDatas.Add(new Target
+                if (targets[i] == null)
                 {
-                    target = target,
-                    origin = target.localPosition,
-                    current = target.localPosition,
-                    next = FindNewPos(target.localPosition, target.localPosition + Vector3.right)
+                    targets.RemoveAt(i);
+                    continue;
+                }
+
+                targetsDatas.Add(new TargetData
+                {
+                    target = targets[i],
+                    origin = targets[i].localPosition,
+                    originAngle = targets[i].localRotation.eulerAngles.z
                 });
             }
-
-            DoShake = Attack;
         }
-
-        #region State Machine
-
-        private void Attack(float delta)
-        {
-            IncrementTimer(attackDuration, delta);
-            intensity = Tween.InterpolateValue(0, 1, attackDuration, elapsedTime, attackEase, attackTrans);
-
-            if (elapsedTime >= attackDuration)
-                DoShake = Shaking;
-        }
-
-        private void Shaking(float delta)
-        {
-            IncrementTimer(shakeDuration, delta);
-            if (elapsedTime >= attackDuration)
-                DoShake = Release;
-        }
-
-        private void Release(float delta)
-        {
-            IncrementTimer(releaseDuration, delta);
-            intensity = Tween.InterpolateValue(1, 0, releaseDuration, elapsedTime, releaseEase, releaseTransition);
-
-            if (elapsedTime >= releaseDuration)
-                Stop();
-        }
-
-        #endregion
 
         public void Stop()
         {
             if (targets == null) return;
 
-            foreach (Target target in targetsDatas)
-                target.target.localPosition = target.origin;
+            for (int i = targetsDatas.Count - 1; i >= 0; i--)
+            {
+                if (targetsDatas[i].target == null)
+                {
+                    targetsDatas.RemoveAt(i);
+                    continue;
+                }
+                targetsDatas[i].target.SetLocalPositionAndRotation(
+                    localPosition: targetsDatas[i].origin,
+                    localRotation: Quaternion.Euler(0, 0, targetsDatas[i].originAngle));
+            }
 
-            DoShake = null;
-            stepElapsedTime = 0f;
+            intensityTween?.Kill();
+            intensityTween = null;
         }
 
-        public bool IsPlaying() => doShake != null;
-
-        private void IncrementTimer(in float duration, in float delta) => elapsedTime = Mathf.Clamp(elapsedTime + delta, 0, duration);
-
-        private Vector2 FindNewPos(in Vector3 origin, in Vector3 current)
+        public void Push(in Vector2 offset, in float duration)
         {
-            float noise = Random.Range(-maxNoise, maxNoise);
-            if (noise > -minNoise && noise < minNoise) // Noise too small
-                noise = noise > 0 ? minNoise : -minNoise;
+            if (duration <= 0) return;
 
-            float angle = Vector2.Angle(Vector2.right, new Vector2(current.x - origin.x, current.y - origin.y).normalized) + noise;
-            Vector2 next = Utilities.VectorFromAngle(angle);
-
-            next.x *= Amplitude.x;
-            next.y *= Amplitude.y;
-
-            return (Vector2)origin + next;
+            MasterTween.Tween tween = MasterTween.Create();
+            tween.TweenEvent(Vector2.zero, offset, TweenOffset, animParams: new MasterTween.AnimParams
+            (duration, MasterTween.ETransition.SmoothStopArch3));
         }
+
+        private void TweenOffset(Vector2 offset) => currentOffset = offset;
+
+        private void TweenIntensity(float newIntensity) => intensity = newIntensity;
+
+        public void ChangeIntensityCoef(float targetValue, 
+            float duration = 0, MasterTween.ETransition transition = MasterTween.ETransition.Linear)
+        {
+            if (duration <= 0) return;
+            if (duration == 0) intensityCoef = targetValue;
+
+            intensityCoefTween?.Kill();
+            intensityCoefTween = MasterTween.Create("IntensityCoef Tween");
+            intensityCoefTween.TweenEvent(
+                startValue: intensityCoef,
+                targetValue: targetValue,
+                tweenEvent: TweenIntensityCoef,
+                new MasterTween.AnimParams(duration, transition)
+            );
+        }
+
+        private void TweenIntensityCoef(float newIntensityCoef) => intensityCoef = newIntensityCoef;
     }
 }

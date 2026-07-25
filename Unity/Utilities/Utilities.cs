@@ -1,11 +1,24 @@
 using System;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 namespace ArTiX.Utils
 {
+    #region MyClasses
+
     public class Utilities
     {
+        public const float FLOAT_THRESHOLD = 0.0001f;
+
+        // COMMON MATERIAL PROPERTIES
+        public const string RADIUS = "_Radius";
+        public const string INTENSITY = "_Intensity";
+        public const string FILL_AMOUNT = "_FillAmount";
+        public const string HIT_AMOUNT = "_HitAmount";
+        public const string CENTER = "_Center";
+        public const string COLOR = "_Color";
+
         public static Vector2 GetCenterOfTheScreen()
         {
             float x_Center = Screen.width / 2;
@@ -16,9 +29,29 @@ namespace ArTiX.Utils
 
         public static Vector2 VectorFromAngle(in float angle, float magnitude = 1)
             => new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * magnitude;
+
+        public static Vector3 ConvertFromWorldPointToNormalizedScreenPoint(Vector3 worldPoint)
+        {
+            worldPoint = Camera.main.WorldToScreenPoint(worldPoint);
+            worldPoint.x /= Screen.width;
+            worldPoint.y /= Screen.height;
+
+            return worldPoint;
+        }
+
+        public static TextMeshPro SpawnText(in string text, in Vector3 position, in Quaternion rotation, in float fontSize)
+        {
+            TextMeshPro textObj = new GameObject("Text", typeof(TextMeshPro)).GetComponent<TextMeshPro>();
+            textObj.transform.SetPositionAndRotation(position, rotation);
+            textObj.text = text;
+            textObj.fontSize = fontSize;
+            textObj.alignment = TextAlignmentOptions.Center;
+
+            return textObj;
+        }
     }
 
-    public class MyDebug
+    public static class MyDebug
     {
         public static void DrawSquareXY(Vector3 squareMiddleWorldPos, float size, Color color, float duration)
         {
@@ -84,7 +117,7 @@ namespace ArTiX.Utils
         }
     }
 
-    public class MyRandom
+    public static class MyRandom
     {
         public static Vector2 GetRandomPointWithinSquare(float width, float height, Vector2 origin)
         {
@@ -145,11 +178,11 @@ namespace ArTiX.Utils
         }
     }
 
-    public class MyCursor
+    public static class MyCursor
     {
         public static Vector2 GetMousePosition2D(Camera camera)
         {
-            Vector2 mousePos = Input.mousePosition;
+            Vector2 mousePos = UnityEngine.Input.mousePosition;
             return camera.ScreenToWorldPoint(mousePos);
         }
 
@@ -157,7 +190,7 @@ namespace ArTiX.Utils
 
         public static Vector3 GetMousePosition3D(Camera camera)
         {
-            Vector2 mousePos = Input.mousePosition;
+            Vector2 mousePos = UnityEngine.Input.mousePosition;
             Ray ray = camera.ScreenPointToRay(mousePos);
             Physics.Raycast(ray, out RaycastHit hit, 100000);
             return hit.point;
@@ -165,6 +198,13 @@ namespace ArTiX.Utils
 
         public static Vector3 GetMousePosition3D() => GetMousePosition3D(Camera.main);
     }
+
+    public static class Math
+    {
+        public static float NormalizedSin(float x) => (Mathf.Sin(x) + 1) * 0.5f;
+    }
+
+    #endregion
 
     #region Class Extension
 
@@ -228,6 +268,21 @@ namespace ArTiX.Utils
         }
     }
 
+    public static class SpriteExtension
+    {
+        public static Vector2 GetRealWorldSize(this Sprite sprite)
+        {
+            return new Vector2(sprite.texture.width, sprite.texture.height) / sprite.pixelsPerUnit;
+        }
+
+        public static Rect GetSpriteRect(this SpriteRenderer renderer)
+        {
+            Vector2 enemySize = renderer.sprite.GetRealWorldSize();
+            return new Rect(renderer.transform.position.AddVector2(-enemySize * .5f),
+                enemySize);
+        }
+    }
+
     public static class VectorExtension
     {
         public static Vector3 PutVectorOnXZPlane(this Vector3 vector) => new Vector3(vector.x, 0, vector.z);
@@ -254,7 +309,7 @@ namespace ArTiX.Utils
             return vector;
         }
 
-        public static Vector2 Abs(this Vector3 vector)
+        public static Vector3 Abs(this Vector3 vector)
         {
             Vector3 newVector = vector;
             newVector.x = Mathf.Abs(vector.x);
@@ -268,6 +323,101 @@ namespace ArTiX.Utils
             newVector.x = Mathf.Abs(vector.x);
             newVector.y = Mathf.Abs(vector.y);
             return newVector;
+        }
+        public static Vector2Int Abs(this Vector2Int vec)
+        {
+            return new Vector2Int(
+                x: Mathf.Abs(vec.x),
+                y: Mathf.Abs(vec.y));
+        }
+
+        public static bool Colinear(this Vector3 self, in Vector3 vector)
+        {
+            return Mathf.Abs(Vector3.Dot(self.normalized, vector.normalized)) == 1;
+        }
+        public static bool Colinear(this Vector2 self, in Vector2 vector)
+        {
+            return Mathf.Abs(Vector2.Dot(self.normalized, vector.normalized)) == 1;
+        }
+
+        public static Vector3 GetClosestPoint(this Vector3 origin, params Vector3[] points)
+        {
+            Vector3 closestPoint = Vector3.one * float.MaxValue;
+            float closestDistance = float.MaxValue;
+            foreach(Vector3 point in points)
+            {
+                if (Vector3.Distance(origin, point) < closestDistance)
+                {
+                    closestDistance = Vector3.Distance(point, origin);
+                    closestPoint = point;
+                }
+            }
+
+            return closestPoint;
+        }
+        public static Vector2 GetClosestPoint(this Vector3 origin, params Vector2[] points)
+        {
+            Vector2 closestPoint = Vector2.one * float.MaxValue;
+            float closestDistance = float.MaxValue;
+            foreach (Vector2 point in points)
+            {
+                if (Vector2.Distance(origin, point) < closestDistance)
+                {
+                    closestDistance = Vector3.Distance(point, origin);
+                    closestPoint = point;
+                }
+            }
+
+            return closestPoint;
+        }
+        public static Vector2 GetClosestPoint(this Vector2 origin, params Vector2[] points)
+        {
+            Vector2 closestPoint = Vector2.one * float.MaxValue;
+            float closestDistance = float.MaxValue;
+            foreach (Vector2 point in points)
+            {
+                if (Vector2.Distance(origin, point) < closestDistance)
+                {
+                    closestDistance = Vector3.Distance(point, origin);
+                    closestPoint = point;
+                }
+            }
+
+            return closestPoint;
+        }
+
+        public static bool IsBetweenPoints(this Vector3 self, in Vector3 a, in Vector3 b)
+        {
+            float aDot = Vector3.Dot(a - self, a - b);
+            float bDot = Vector3.Dot(b - self, b - a);
+            return aDot >= 0 && bDot >= 0;
+        }
+        public static bool IsBetweenPoints(this Vector2 self, in Vector2 a, in Vector2 b)
+        {
+            float aDot = Vector2.Dot(a - self, a - b);
+            float bDot = Vector2.Dot(b - self, b - a);
+            return aDot >= 0 && bDot >= 0;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns>A vector normal to this vector.</returns>
+        public static Vector2 Normal(this Vector2 vec) => new Vector2(-vec.y, vec.x);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="vec"></param>
+        /// <param name="angle">In degrees.</param>
+        /// <returns></returns>
+        public static Vector2Int Rotate(this Vector2Int vec, float angle)
+        {
+            angle *= Mathf.Deg2Rad;
+            return new Vector2Int(
+                x: Mathf.RoundToInt((vec.x * Mathf.Cos(angle)) - (vec.y * Mathf.Sin(angle))),
+                y: Mathf.RoundToInt((vec.x * Mathf.Sin(angle)) + (vec.y * Mathf.Cos(angle)))
+            );
         }
     }
 
@@ -305,6 +455,36 @@ namespace ArTiX.Utils
                 collider.size.y * objectScale.y,
                 collider.size.z * objectScale.z,
                 collider.transform.position);
+        }
+    }
+
+    public static class FloatExtension
+    {
+        /// <summary>
+        /// Change the value of this float by a certain percentage. For exemple, if value equals 5 and percentage equals 0.2,
+        /// value will now be equal to a value in the [4, 6] range.
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="percentage">Percentage of modification. Must be in the [0, 1] range.</param>
+        /// <returns></returns>
+        public static float Randomize(this float value, float percentage)
+        {
+            percentage = Mathf.Clamp01(percentage);
+            value *= 1 + UnityEngine.Random.Range(-percentage, percentage);
+            return value;
+        }
+    }
+
+    public static class RectExtension
+    {
+        public static Vector2 GetHalfSize(this Rect rect) => rect.size * 0.5f;
+
+        public static bool IsPointWithin(this Rect rect, Vector2 point)
+        {
+            Vector2 rectHalfSize = rect.GetHalfSize();
+
+            return Mathf.Abs(point.x - rect.center.x) - Utilities.FLOAT_THRESHOLD <= rectHalfSize.x && 
+                   Mathf.Abs(point.y - rect.center.y) - Utilities.FLOAT_THRESHOLD <= rectHalfSize.y;
         }
     }
 

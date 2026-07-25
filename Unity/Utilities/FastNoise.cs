@@ -265,25 +265,25 @@ namespace Noise
     };
 
         [MethodImplAttribute(FN_INLINE)]
-        private static int FastFloor(FN_DECIMAL f) { return (f >= 0 ? (int)f : (int)f - 1); }
+        private static int FastFloor(FN_DECIMAL f) { return f >= 0 ? (int)f : (int)f - 1; }
 
         [MethodImplAttribute(FN_INLINE)]
         private static int FastRound(FN_DECIMAL f) { return (f >= 0) ? (int)(f + (FN_DECIMAL)0.5) : (int)(f - (FN_DECIMAL)0.5); }
 
         [MethodImplAttribute(FN_INLINE)]
-        private static FN_DECIMAL Lerp(FN_DECIMAL a, FN_DECIMAL b, FN_DECIMAL t) { return a + t * (b - a); }
+        private static FN_DECIMAL Lerp(FN_DECIMAL a, FN_DECIMAL b, FN_DECIMAL t) { return a + (t * (b - a)); }
 
         [MethodImplAttribute(FN_INLINE)]
-        private static FN_DECIMAL InterpHermiteFunc(FN_DECIMAL t) { return t * t * (3 - 2 * t); }
+        private static FN_DECIMAL InterpHermiteFunc(FN_DECIMAL t) { return t * t * (3 - (2 * t)); }
 
         [MethodImplAttribute(FN_INLINE)]
-        private static FN_DECIMAL InterpQuinticFunc(FN_DECIMAL t) { return t * t * t * (t * (t * 6 - 15) + 10); }
+        private static FN_DECIMAL InterpQuinticFunc(FN_DECIMAL t) { return t * t * t * ((t * ((t * 6) - 15)) + 10); }
 
         [MethodImplAttribute(FN_INLINE)]
         private static FN_DECIMAL CubicLerp(FN_DECIMAL a, FN_DECIMAL b, FN_DECIMAL c, FN_DECIMAL d, FN_DECIMAL t)
         {
-            FN_DECIMAL p = (d - c) - (a - b);
-            return t * t * t * p + t * t * ((a - b) - p) + t * (c - a) + b;
+            FN_DECIMAL p = d - c - (a - b);
+            return (t * t * t * p) + (t * t * (a - b - p)) + (t * (c - a)) + b;
         }
 
         private void CalculateFractalBounding()
@@ -353,7 +353,7 @@ namespace Noise
             n ^= X_PRIME * x;
             n ^= Y_PRIME * y;
 
-            return (n * n * n * 60493) / (FN_DECIMAL)2147483648.0;
+            return n * n * n * 60493 / (FN_DECIMAL)2147483648.0;
         }
 
         [MethodImplAttribute(FN_INLINE)]
@@ -364,7 +364,7 @@ namespace Noise
             n ^= Y_PRIME * y;
             n ^= Z_PRIME * z;
 
-            return (n * n * n * 60493) / (FN_DECIMAL)2147483648.0;
+            return n * n * n * 60493 / (FN_DECIMAL)2147483648.0;
         }
 
         [MethodImplAttribute(FN_INLINE)]
@@ -376,7 +376,7 @@ namespace Noise
             n ^= Z_PRIME * z;
             n ^= W_PRIME * w;
 
-            return (n * n * n * 60493) / (FN_DECIMAL)2147483648.0;
+            return n * n * n * 60493 / (FN_DECIMAL)2147483648.0;
         }
 
         [MethodImplAttribute(FN_INLINE)]
@@ -391,7 +391,7 @@ namespace Noise
 
             Float2 g = GRAD_2D[hash & 7];
 
-            return xd * g.x + yd * g.y;
+            return (xd * g.x) + (yd * g.y);
         }
 
         [MethodImplAttribute(FN_INLINE)]
@@ -407,7 +407,7 @@ namespace Noise
 
             Float3 g = GRAD_3D[hash & 15];
 
-            return xd * g.x + yd * g.y + zd * g.z;
+            return (xd * g.x) + (yd * g.y) + (zd * g.z);
         }
 
         [MethodImplAttribute(FN_INLINE)]
@@ -687,7 +687,7 @@ namespace Noise
         private FN_DECIMAL SingleValueFractalBillow(FN_DECIMAL x, FN_DECIMAL y, FN_DECIMAL z)
         {
             int seed = m_seed;
-            FN_DECIMAL sum = Math.Abs(SingleValue(seed, x, y, z)) * 2 - 1;
+            FN_DECIMAL sum = (Math.Abs(SingleValue(seed, x, y, z)) * 2) - 1;
             FN_DECIMAL amp = 1;
 
             for (int i = 1; i < m_octaves; i++)
@@ -697,7 +697,7 @@ namespace Noise
                 z *= m_lacunarity;
 
                 amp *= m_gain;
-                sum += (Math.Abs(SingleValue(++seed, x, y, z)) * 2 - 1) * amp;
+                sum += ((Math.Abs(SingleValue(++seed, x, y, z)) * 2) - 1) * amp;
             }
 
             return sum * m_fractalBounding;
@@ -807,7 +807,7 @@ namespace Noise
         private FN_DECIMAL SingleValueFractalBillow(FN_DECIMAL x, FN_DECIMAL y)
         {
             int seed = m_seed;
-            FN_DECIMAL sum = Math.Abs(SingleValue(seed, x, y)) * 2 - 1;
+            FN_DECIMAL sum = (Math.Abs(SingleValue(seed, x, y)) * 2) - 1;
             FN_DECIMAL amp = 1;
 
             for (int i = 1; i < m_octaves; i++)
@@ -815,7 +815,7 @@ namespace Noise
                 x *= m_lacunarity;
                 y *= m_lacunarity;
                 amp *= m_gain;
-                sum += (Math.Abs(SingleValue(++seed, x, y)) * 2 - 1) * amp;
+                sum += ((Math.Abs(SingleValue(++seed, x, y)) * 2) - 1) * amp;
             }
 
             return sum * m_fractalBounding;
@@ -917,7 +917,7 @@ namespace Noise
         private FN_DECIMAL SinglePerlinFractalBillow(FN_DECIMAL x, FN_DECIMAL y, FN_DECIMAL z)
         {
             int seed = m_seed;
-            FN_DECIMAL sum = Math.Abs(SinglePerlin(seed, x, y, z)) * 2 - 1;
+            FN_DECIMAL sum = (Math.Abs(SinglePerlin(seed, x, y, z)) * 2) - 1;
             FN_DECIMAL amp = 1;
 
             for (int i = 1; i < m_octaves; i++)
@@ -927,7 +927,7 @@ namespace Noise
                 z *= m_lacunarity;
 
                 amp *= m_gain;
-                sum += (Math.Abs(SinglePerlin(++seed, x, y, z)) * 2 - 1) * amp;
+                sum += ((Math.Abs(SinglePerlin(++seed, x, y, z)) * 2) - 1) * amp;
             }
 
             return sum * m_fractalBounding;
@@ -1044,7 +1044,7 @@ namespace Noise
         private FN_DECIMAL SinglePerlinFractalBillow(FN_DECIMAL x, FN_DECIMAL y)
         {
             int seed = m_seed;
-            FN_DECIMAL sum = Math.Abs(SinglePerlin(seed, x, y)) * 2 - 1;
+            FN_DECIMAL sum = (Math.Abs(SinglePerlin(seed, x, y)) * 2) - 1;
             FN_DECIMAL amp = 1;
 
             for (int i = 1; i < m_octaves; i++)
@@ -1053,7 +1053,7 @@ namespace Noise
                 y *= m_lacunarity;
 
                 amp *= m_gain;
-                sum += (Math.Abs(SinglePerlin(++seed, x, y)) * 2 - 1) * amp;
+                sum += ((Math.Abs(SinglePerlin(++seed, x, y)) * 2) - 1) * amp;
             }
 
             return sum * m_fractalBounding;
@@ -1077,9 +1077,15 @@ namespace Noise
             return sum;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <returns>A value in [-1,1].</returns>
         public FN_DECIMAL GetPerlin(FN_DECIMAL x, FN_DECIMAL y)
         {
-            return SinglePerlin(m_seed, x * m_frequency, y * m_frequency);
+            return SinglePerlin(m_seed, x * m_frequency, y * m_frequency) * 2;
         }
 
         private FN_DECIMAL SinglePerlin(int seed, FN_DECIMAL x, FN_DECIMAL y)
@@ -1160,7 +1166,7 @@ namespace Noise
         private FN_DECIMAL SingleSimplexFractalBillow(FN_DECIMAL x, FN_DECIMAL y, FN_DECIMAL z)
         {
             int seed = m_seed;
-            FN_DECIMAL sum = Math.Abs(SingleSimplex(seed, x, y, z)) * 2 - 1;
+            FN_DECIMAL sum = (Math.Abs(SingleSimplex(seed, x, y, z)) * 2) - 1;
             FN_DECIMAL amp = 1;
 
             for (int i = 1; i < m_octaves; i++)
@@ -1170,7 +1176,7 @@ namespace Noise
                 z *= m_lacunarity;
 
                 amp *= m_gain;
-                sum += (Math.Abs(SingleSimplex(++seed, x, y, z)) * 2 - 1) * amp;
+                sum += ((Math.Abs(SingleSimplex(++seed, x, y, z)) * 2) - 1) * amp;
             }
 
             return sum * m_fractalBounding;
@@ -1202,7 +1208,7 @@ namespace Noise
 
         private const FN_DECIMAL F3 = (FN_DECIMAL)(1.0 / 3.0);
         private const FN_DECIMAL G3 = (FN_DECIMAL)(1.0 / 6.0);
-        private const FN_DECIMAL G33 = G3 * 3 - 1;
+        private const FN_DECIMAL G33 = (G3 * 3) - 1;
 
         private FN_DECIMAL SingleSimplex(int seed, FN_DECIMAL x, FN_DECIMAL y, FN_DECIMAL z)
         {
@@ -1262,7 +1268,7 @@ namespace Noise
 
             FN_DECIMAL n0, n1, n2, n3;
 
-            t = (FN_DECIMAL)0.6 - x0 * x0 - y0 * y0 - z0 * z0;
+            t = (FN_DECIMAL)0.6 - (x0 * x0) - (y0 * y0) - (z0 * z0);
             if (t < 0) n0 = 0;
             else
             {
@@ -1270,7 +1276,7 @@ namespace Noise
                 n0 = t * t * GradCoord3D(seed, i, j, k, x0, y0, z0);
             }
 
-            t = (FN_DECIMAL)0.6 - x1 * x1 - y1 * y1 - z1 * z1;
+            t = (FN_DECIMAL)0.6 - (x1 * x1) - (y1 * y1) - (z1 * z1);
             if (t < 0) n1 = 0;
             else
             {
@@ -1278,7 +1284,7 @@ namespace Noise
                 n1 = t * t * GradCoord3D(seed, i + i1, j + j1, k + k1, x1, y1, z1);
             }
 
-            t = (FN_DECIMAL)0.6 - x2 * x2 - y2 * y2 - z2 * z2;
+            t = (FN_DECIMAL)0.6 - (x2 * x2) - (y2 * y2) - (z2 * z2);
             if (t < 0) n2 = 0;
             else
             {
@@ -1286,7 +1292,7 @@ namespace Noise
                 n2 = t * t * GradCoord3D(seed, i + i2, j + j2, k + k2, x2, y2, z2);
             }
 
-            t = (FN_DECIMAL)0.6 - x3 * x3 - y3 * y3 - z3 * z3;
+            t = (FN_DECIMAL)0.6 - (x3 * x3) - (y3 * y3) - (z3 * z3);
             if (t < 0) n3 = 0;
             else
             {
@@ -1336,7 +1342,7 @@ namespace Noise
         private FN_DECIMAL SingleSimplexFractalBillow(FN_DECIMAL x, FN_DECIMAL y)
         {
             int seed = m_seed;
-            FN_DECIMAL sum = Math.Abs(SingleSimplex(seed, x, y)) * 2 - 1;
+            FN_DECIMAL sum = (Math.Abs(SingleSimplex(seed, x, y)) * 2) - 1;
             FN_DECIMAL amp = 1;
 
             for (int i = 1; i < m_octaves; i++)
@@ -1345,7 +1351,7 @@ namespace Noise
                 y *= m_lacunarity;
 
                 amp *= m_gain;
-                sum += (Math.Abs(SingleSimplex(++seed, x, y)) * 2 - 1) * amp;
+                sum += ((Math.Abs(SingleSimplex(++seed, x, y)) * 2) - 1) * amp;
             }
 
             return sum * m_fractalBounding;
@@ -1406,12 +1412,12 @@ namespace Noise
 
             FN_DECIMAL x1 = x0 - i1 + G2;
             FN_DECIMAL y1 = y0 - j1 + G2;
-            FN_DECIMAL x2 = x0 - 1 + 2 * G2;
-            FN_DECIMAL y2 = y0 - 1 + 2 * G2;
+            FN_DECIMAL x2 = x0 - 1 + (2 * G2);
+            FN_DECIMAL y2 = y0 - 1 + (2 * G2);
 
             FN_DECIMAL n0, n1, n2;
 
-            t = (FN_DECIMAL)0.5 - x0 * x0 - y0 * y0;
+            t = (FN_DECIMAL)0.5 - (x0 * x0) - (y0 * y0);
             if (t < 0) n0 = 0;
             else
             {
@@ -1419,7 +1425,7 @@ namespace Noise
                 n0 = t * t * GradCoord2D(seed, i, j, x0, y0);
             }
 
-            t = (FN_DECIMAL)0.5 - x1 * x1 - y1 * y1;
+            t = (FN_DECIMAL)0.5 - (x1 * x1) - (y1 * y1);
             if (t < 0) n1 = 0;
             else
             {
@@ -1427,7 +1433,7 @@ namespace Noise
                 n1 = t * t * GradCoord2D(seed, i + i1, j + j1, x1, y1);
             }
 
-            t = (FN_DECIMAL)0.5 - x2 * x2 - y2 * y2;
+            t = (FN_DECIMAL)0.5 - (x2 * x2) - (y2 * y2);
             if (t < 0) n2 = 0;
             else
             {
@@ -1501,48 +1507,48 @@ namespace Noise
             FN_DECIMAL y1 = y0 - j1 + G4;
             FN_DECIMAL z1 = z0 - k1 + G4;
             FN_DECIMAL w1 = w0 - l1 + G4;
-            FN_DECIMAL x2 = x0 - i2 + 2 * G4;
-            FN_DECIMAL y2 = y0 - j2 + 2 * G4;
-            FN_DECIMAL z2 = z0 - k2 + 2 * G4;
-            FN_DECIMAL w2 = w0 - l2 + 2 * G4;
-            FN_DECIMAL x3 = x0 - i3 + 3 * G4;
-            FN_DECIMAL y3 = y0 - j3 + 3 * G4;
-            FN_DECIMAL z3 = z0 - k3 + 3 * G4;
-            FN_DECIMAL w3 = w0 - l3 + 3 * G4;
-            FN_DECIMAL x4 = x0 - 1 + 4 * G4;
-            FN_DECIMAL y4 = y0 - 1 + 4 * G4;
-            FN_DECIMAL z4 = z0 - 1 + 4 * G4;
-            FN_DECIMAL w4 = w0 - 1 + 4 * G4;
+            FN_DECIMAL x2 = x0 - i2 + (2 * G4);
+            FN_DECIMAL y2 = y0 - j2 + (2 * G4);
+            FN_DECIMAL z2 = z0 - k2 + (2 * G4);
+            FN_DECIMAL w2 = w0 - l2 + (2 * G4);
+            FN_DECIMAL x3 = x0 - i3 + (3 * G4);
+            FN_DECIMAL y3 = y0 - j3 + (3 * G4);
+            FN_DECIMAL z3 = z0 - k3 + (3 * G4);
+            FN_DECIMAL w3 = w0 - l3 + (3 * G4);
+            FN_DECIMAL x4 = x0 - 1 + (4 * G4);
+            FN_DECIMAL y4 = y0 - 1 + (4 * G4);
+            FN_DECIMAL z4 = z0 - 1 + (4 * G4);
+            FN_DECIMAL w4 = w0 - 1 + (4 * G4);
 
-            t = (FN_DECIMAL)0.6 - x0 * x0 - y0 * y0 - z0 * z0 - w0 * w0;
+            t = (FN_DECIMAL)0.6 - (x0 * x0) - (y0 * y0) - (z0 * z0) - (w0 * w0);
             if (t < 0) n0 = 0;
             else
             {
                 t *= t;
                 n0 = t * t * GradCoord4D(seed, i, j, k, l, x0, y0, z0, w0);
             }
-            t = (FN_DECIMAL)0.6 - x1 * x1 - y1 * y1 - z1 * z1 - w1 * w1;
+            t = (FN_DECIMAL)0.6 - (x1 * x1) - (y1 * y1) - (z1 * z1) - (w1 * w1);
             if (t < 0) n1 = 0;
             else
             {
                 t *= t;
                 n1 = t * t * GradCoord4D(seed, i + i1, j + j1, k + k1, l + l1, x1, y1, z1, w1);
             }
-            t = (FN_DECIMAL)0.6 - x2 * x2 - y2 * y2 - z2 * z2 - w2 * w2;
+            t = (FN_DECIMAL)0.6 - (x2 * x2) - (y2 * y2) - (z2 * z2) - (w2 * w2);
             if (t < 0) n2 = 0;
             else
             {
                 t *= t;
                 n2 = t * t * GradCoord4D(seed, i + i2, j + j2, k + k2, l + l2, x2, y2, z2, w2);
             }
-            t = (FN_DECIMAL)0.6 - x3 * x3 - y3 * y3 - z3 * z3 - w3 * w3;
+            t = (FN_DECIMAL)0.6 - (x3 * x3) - (y3 * y3) - (z3 * z3) - (w3 * w3);
             if (t < 0) n3 = 0;
             else
             {
                 t *= t;
                 n3 = t * t * GradCoord4D(seed, i + i3, j + j3, k + k3, l + l3, x3, y3, z3, w3);
             }
-            t = (FN_DECIMAL)0.6 - x4 * x4 - y4 * y4 - z4 * z4 - w4 * w4;
+            t = (FN_DECIMAL)0.6 - (x4 * x4) - (y4 * y4) - (z4 * z4) - (w4 * w4);
             if (t < 0) n4 = 0;
             else
             {
@@ -1596,7 +1602,7 @@ namespace Noise
         private FN_DECIMAL SingleCubicFractalBillow(FN_DECIMAL x, FN_DECIMAL y, FN_DECIMAL z)
         {
             int seed = m_seed;
-            FN_DECIMAL sum = Math.Abs(SingleCubic(seed, x, y, z)) * 2 - 1;
+            FN_DECIMAL sum = (Math.Abs(SingleCubic(seed, x, y, z)) * 2) - 1;
             FN_DECIMAL amp = 1;
             int i = 0;
 
@@ -1607,7 +1613,7 @@ namespace Noise
                 z *= m_lacunarity;
 
                 amp *= m_gain;
-                sum += (Math.Abs(SingleCubic(++seed, x, y, z)) * 2 - 1) * amp;
+                sum += ((Math.Abs(SingleCubic(++seed, x, y, z)) * 2) - 1) * amp;
             }
 
             return sum * m_fractalBounding;
@@ -1656,9 +1662,9 @@ namespace Noise
             int y3 = y1 + 2;
             int z3 = z1 + 2;
 
-            FN_DECIMAL xs = x - (FN_DECIMAL)x1;
-            FN_DECIMAL ys = y - (FN_DECIMAL)y1;
-            FN_DECIMAL zs = z - (FN_DECIMAL)z1;
+            FN_DECIMAL xs = x - x1;
+            FN_DECIMAL ys = y - y1;
+            FN_DECIMAL zs = z - z1;
 
             return CubicLerp(
                 CubicLerp(
@@ -1729,7 +1735,7 @@ namespace Noise
         private FN_DECIMAL SingleCubicFractalBillow(FN_DECIMAL x, FN_DECIMAL y)
         {
             int seed = m_seed;
-            FN_DECIMAL sum = Math.Abs(SingleCubic(seed, x, y)) * 2 - 1;
+            FN_DECIMAL sum = (Math.Abs(SingleCubic(seed, x, y)) * 2) - 1;
             FN_DECIMAL amp = 1;
             int i = 0;
 
@@ -1739,7 +1745,7 @@ namespace Noise
                 y *= m_lacunarity;
 
                 amp *= m_gain;
-                sum += (Math.Abs(SingleCubic(++seed, x, y)) * 2 - 1) * amp;
+                sum += ((Math.Abs(SingleCubic(++seed, x, y)) * 2) - 1) * amp;
             }
 
             return sum * m_fractalBounding;
@@ -1786,8 +1792,8 @@ namespace Noise
             int x3 = x1 + 2;
             int y3 = y1 + 2;
 
-            FN_DECIMAL xs = x - (FN_DECIMAL)x1;
-            FN_DECIMAL ys = y - (FN_DECIMAL)y1;
+            FN_DECIMAL xs = x - x1;
+            FN_DECIMAL ys = y - y1;
 
             return CubicLerp(
                        CubicLerp(ValCoord2D(seed, x0, y0), ValCoord2D(seed, x1, y0), ValCoord2D(seed, x2, y0), ValCoord2D(seed, x3, y0),
@@ -1839,11 +1845,11 @@ namespace Noise
                             {
                                 Float3 vec = CELL_3D[Hash3D(m_seed, xi, yi, zi) & 255];
 
-                                FN_DECIMAL vecX = xi - x + vec.x * m_cellularJitter;
-                                FN_DECIMAL vecY = yi - y + vec.y * m_cellularJitter;
-                                FN_DECIMAL vecZ = zi - z + vec.z * m_cellularJitter;
+                                FN_DECIMAL vecX = xi - x + (vec.x * m_cellularJitter);
+                                FN_DECIMAL vecY = yi - y + (vec.y * m_cellularJitter);
+                                FN_DECIMAL vecZ = zi - z + (vec.z * m_cellularJitter);
 
-                                FN_DECIMAL newDistance = vecX * vecX + vecY * vecY + vecZ * vecZ;
+                                FN_DECIMAL newDistance = (vecX * vecX) + (vecY * vecY) + (vecZ * vecZ);
 
                                 if (newDistance < distance)
                                 {
@@ -1865,9 +1871,9 @@ namespace Noise
                             {
                                 Float3 vec = CELL_3D[Hash3D(m_seed, xi, yi, zi) & 255];
 
-                                FN_DECIMAL vecX = xi - x + vec.x * m_cellularJitter;
-                                FN_DECIMAL vecY = yi - y + vec.y * m_cellularJitter;
-                                FN_DECIMAL vecZ = zi - z + vec.z * m_cellularJitter;
+                                FN_DECIMAL vecX = xi - x + (vec.x * m_cellularJitter);
+                                FN_DECIMAL vecY = yi - y + (vec.y * m_cellularJitter);
+                                FN_DECIMAL vecZ = zi - z + (vec.z * m_cellularJitter);
 
                                 FN_DECIMAL newDistance = Math.Abs(vecX) + Math.Abs(vecY) + Math.Abs(vecZ);
 
@@ -1891,11 +1897,11 @@ namespace Noise
                             {
                                 Float3 vec = CELL_3D[Hash3D(m_seed, xi, yi, zi) & 255];
 
-                                FN_DECIMAL vecX = xi - x + vec.x * m_cellularJitter;
-                                FN_DECIMAL vecY = yi - y + vec.y * m_cellularJitter;
-                                FN_DECIMAL vecZ = zi - z + vec.z * m_cellularJitter;
+                                FN_DECIMAL vecX = xi - x + (vec.x * m_cellularJitter);
+                                FN_DECIMAL vecY = yi - y + (vec.y * m_cellularJitter);
+                                FN_DECIMAL vecZ = zi - z + (vec.z * m_cellularJitter);
 
-                                FN_DECIMAL newDistance = (Math.Abs(vecX) + Math.Abs(vecY) + Math.Abs(vecZ)) + (vecX * vecX + vecY * vecY + vecZ * vecZ);
+                                FN_DECIMAL newDistance = Math.Abs(vecX) + Math.Abs(vecY) + Math.Abs(vecZ) + ((vecX * vecX) + (vecY * vecY) + (vecZ * vecZ));
 
                                 if (newDistance < distance)
                                 {
@@ -1917,7 +1923,7 @@ namespace Noise
 
                 case CellularReturnType.NoiseLookup:
                     Float3 vec = CELL_3D[Hash3D(m_seed, xc, yc, zc) & 255];
-                    return m_cellularNoiseLookup.GetNoise(xc + vec.x * m_cellularJitter, yc + vec.y * m_cellularJitter, zc + vec.z * m_cellularJitter);
+                    return m_cellularNoiseLookup.GetNoise(xc + (vec.x * m_cellularJitter), yc + (vec.y * m_cellularJitter), zc + (vec.z * m_cellularJitter));
 
                 case CellularReturnType.Distance:
                     return distance;
@@ -1945,11 +1951,11 @@ namespace Noise
                             {
                                 Float3 vec = CELL_3D[Hash3D(m_seed, xi, yi, zi) & 255];
 
-                                FN_DECIMAL vecX = xi - x + vec.x * m_cellularJitter;
-                                FN_DECIMAL vecY = yi - y + vec.y * m_cellularJitter;
-                                FN_DECIMAL vecZ = zi - z + vec.z * m_cellularJitter;
+                                FN_DECIMAL vecX = xi - x + (vec.x * m_cellularJitter);
+                                FN_DECIMAL vecY = yi - y + (vec.y * m_cellularJitter);
+                                FN_DECIMAL vecZ = zi - z + (vec.z * m_cellularJitter);
 
-                                FN_DECIMAL newDistance = vecX * vecX + vecY * vecY + vecZ * vecZ;
+                                FN_DECIMAL newDistance = (vecX * vecX) + (vecY * vecY) + (vecZ * vecZ);
 
                                 for (int i = m_cellularDistanceIndex1; i > 0; i--)
                                     distance[i] = Math.Max(Math.Min(distance[i], newDistance), distance[i - 1]);
@@ -1967,9 +1973,9 @@ namespace Noise
                             {
                                 Float3 vec = CELL_3D[Hash3D(m_seed, xi, yi, zi) & 255];
 
-                                FN_DECIMAL vecX = xi - x + vec.x * m_cellularJitter;
-                                FN_DECIMAL vecY = yi - y + vec.y * m_cellularJitter;
-                                FN_DECIMAL vecZ = zi - z + vec.z * m_cellularJitter;
+                                FN_DECIMAL vecX = xi - x + (vec.x * m_cellularJitter);
+                                FN_DECIMAL vecY = yi - y + (vec.y * m_cellularJitter);
+                                FN_DECIMAL vecZ = zi - z + (vec.z * m_cellularJitter);
 
                                 FN_DECIMAL newDistance = Math.Abs(vecX) + Math.Abs(vecY) + Math.Abs(vecZ);
 
@@ -1989,11 +1995,11 @@ namespace Noise
                             {
                                 Float3 vec = CELL_3D[Hash3D(m_seed, xi, yi, zi) & 255];
 
-                                FN_DECIMAL vecX = xi - x + vec.x * m_cellularJitter;
-                                FN_DECIMAL vecY = yi - y + vec.y * m_cellularJitter;
-                                FN_DECIMAL vecZ = zi - z + vec.z * m_cellularJitter;
+                                FN_DECIMAL vecX = xi - x + (vec.x * m_cellularJitter);
+                                FN_DECIMAL vecY = yi - y + (vec.y * m_cellularJitter);
+                                FN_DECIMAL vecZ = zi - z + (vec.z * m_cellularJitter);
 
-                                FN_DECIMAL newDistance = (Math.Abs(vecX) + Math.Abs(vecY) + Math.Abs(vecZ)) + (vecX * vecX + vecY * vecY + vecZ * vecZ);
+                                FN_DECIMAL newDistance = Math.Abs(vecX) + Math.Abs(vecY) + Math.Abs(vecZ) + ((vecX * vecX) + (vecY * vecY) + (vecZ * vecZ));
 
                                 for (int i = m_cellularDistanceIndex1; i > 0; i--)
                                     distance[i] = Math.Max(Math.Min(distance[i], newDistance), distance[i - 1]);
@@ -2057,10 +2063,10 @@ namespace Noise
                         {
                             Float2 vec = CELL_2D[Hash2D(m_seed, xi, yi) & 255];
 
-                            FN_DECIMAL vecX = xi - x + vec.x * m_cellularJitter;
-                            FN_DECIMAL vecY = yi - y + vec.y * m_cellularJitter;
+                            FN_DECIMAL vecX = xi - x + (vec.x * m_cellularJitter);
+                            FN_DECIMAL vecY = yi - y + (vec.y * m_cellularJitter);
 
-                            FN_DECIMAL newDistance = vecX * vecX + vecY * vecY;
+                            FN_DECIMAL newDistance = (vecX * vecX) + (vecY * vecY);
 
                             if (newDistance < distance)
                             {
@@ -2078,10 +2084,10 @@ namespace Noise
                         {
                             Float2 vec = CELL_2D[Hash2D(m_seed, xi, yi) & 255];
 
-                            FN_DECIMAL vecX = xi - x + vec.x * m_cellularJitter;
-                            FN_DECIMAL vecY = yi - y + vec.y * m_cellularJitter;
+                            FN_DECIMAL vecX = xi - x + (vec.x * m_cellularJitter);
+                            FN_DECIMAL vecY = yi - y + (vec.y * m_cellularJitter);
 
-                            FN_DECIMAL newDistance = (Math.Abs(vecX) + Math.Abs(vecY));
+                            FN_DECIMAL newDistance = Math.Abs(vecX) + Math.Abs(vecY);
 
                             if (newDistance < distance)
                             {
@@ -2099,10 +2105,10 @@ namespace Noise
                         {
                             Float2 vec = CELL_2D[Hash2D(m_seed, xi, yi) & 255];
 
-                            FN_DECIMAL vecX = xi - x + vec.x * m_cellularJitter;
-                            FN_DECIMAL vecY = yi - y + vec.y * m_cellularJitter;
+                            FN_DECIMAL vecX = xi - x + (vec.x * m_cellularJitter);
+                            FN_DECIMAL vecY = yi - y + (vec.y * m_cellularJitter);
 
-                            FN_DECIMAL newDistance = (Math.Abs(vecX) + Math.Abs(vecY)) + (vecX * vecX + vecY * vecY);
+                            FN_DECIMAL newDistance = Math.Abs(vecX) + Math.Abs(vecY) + ((vecX * vecX) + (vecY * vecY));
 
                             if (newDistance < distance)
                             {
@@ -2122,7 +2128,7 @@ namespace Noise
 
                 case CellularReturnType.NoiseLookup:
                     Float2 vec = CELL_2D[Hash2D(m_seed, xc, yc) & 255];
-                    return m_cellularNoiseLookup.GetNoise(xc + vec.x * m_cellularJitter, yc + vec.y * m_cellularJitter);
+                    return m_cellularNoiseLookup.GetNoise(xc + (vec.x * m_cellularJitter), yc + (vec.y * m_cellularJitter));
 
                 case CellularReturnType.Distance:
                     return distance;
@@ -2148,10 +2154,10 @@ namespace Noise
                         {
                             Float2 vec = CELL_2D[Hash2D(m_seed, xi, yi) & 255];
 
-                            FN_DECIMAL vecX = xi - x + vec.x * m_cellularJitter;
-                            FN_DECIMAL vecY = yi - y + vec.y * m_cellularJitter;
+                            FN_DECIMAL vecX = xi - x + (vec.x * m_cellularJitter);
+                            FN_DECIMAL vecY = yi - y + (vec.y * m_cellularJitter);
 
-                            FN_DECIMAL newDistance = vecX * vecX + vecY * vecY;
+                            FN_DECIMAL newDistance = (vecX * vecX) + (vecY * vecY);
 
                             for (int i = m_cellularDistanceIndex1; i > 0; i--)
                                 distance[i] = Math.Max(Math.Min(distance[i], newDistance), distance[i - 1]);
@@ -2166,8 +2172,8 @@ namespace Noise
                         {
                             Float2 vec = CELL_2D[Hash2D(m_seed, xi, yi) & 255];
 
-                            FN_DECIMAL vecX = xi - x + vec.x * m_cellularJitter;
-                            FN_DECIMAL vecY = yi - y + vec.y * m_cellularJitter;
+                            FN_DECIMAL vecX = xi - x + (vec.x * m_cellularJitter);
+                            FN_DECIMAL vecY = yi - y + (vec.y * m_cellularJitter);
 
                             FN_DECIMAL newDistance = Math.Abs(vecX) + Math.Abs(vecY);
 
@@ -2184,10 +2190,10 @@ namespace Noise
                         {
                             Float2 vec = CELL_2D[Hash2D(m_seed, xi, yi) & 255];
 
-                            FN_DECIMAL vecX = xi - x + vec.x * m_cellularJitter;
-                            FN_DECIMAL vecY = yi - y + vec.y * m_cellularJitter;
+                            FN_DECIMAL vecX = xi - x + (vec.x * m_cellularJitter);
+                            FN_DECIMAL vecY = yi - y + (vec.y * m_cellularJitter);
 
-                            FN_DECIMAL newDistance = (Math.Abs(vecX) + Math.Abs(vecY)) + (vecX * vecX + vecY * vecY);
+                            FN_DECIMAL newDistance = Math.Abs(vecX) + Math.Abs(vecY) + ((vecX * vecX) + (vecY * vecY));
 
                             for (int i = m_cellularDistanceIndex1; i > 0; i--)
                                 distance[i] = Math.Max(Math.Min(distance[i], newDistance), distance[i - 1]);
