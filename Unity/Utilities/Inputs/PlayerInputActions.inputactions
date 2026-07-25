@@ -7,44 +7,106 @@
             "id": "13b8e88e-b9c3-4350-b50e-041b0a649fc2",
             "actions": [
                 {
-                    "name": "TouchPosition",
+                    "name": "Select",
+                    "type": "Button",
+                    "id": "2a4a46d8-44ca-4d30-93c7-25835545f990",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Cancel",
+                    "type": "Button",
+                    "id": "2436e7f2-9149-43d6-840b-95b132d8f72d",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Rotate",
                     "type": "Value",
-                    "id": "175a19c4-2e0a-470b-aaee-2b41724d4908",
-                    "expectedControlType": "Vector2",
+                    "id": "7c4f6d30-0e07-4f84-9bd7-a734c15969ad",
+                    "expectedControlType": "Axis",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": true
                 },
                 {
-                    "name": "SimpleTouch",
+                    "name": "ToggleBuildingPanel",
                     "type": "Button",
-                    "id": "20c7ec1b-b58f-4471-bb62-d21cf04b3a7d",
+                    "id": "95d861ca-9374-45d0-bf7b-3e4c4628f108",
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
-                    "initialStateCheck": true
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
                 {
                     "name": "",
-                    "id": "b69083b0-5b18-4551-8115-98484ee1de32",
-                    "path": "<Touchscreen>/primaryTouch/position",
+                    "id": "7912fbef-995d-44b9-8b0d-528ac9198d02",
+                    "path": "<Mouse>/leftButton",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "TouchPosition",
+                    "action": "Select",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
                 {
                     "name": "",
-                    "id": "df5f44b7-8a88-4883-a9fa-3b7b069141cf",
-                    "path": "<Touchscreen>/Press",
+                    "id": "c6fa9bea-bf21-4237-a1dc-0b0a568ef2ce",
+                    "path": "<Mouse>/rightButton",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "SimpleTouch",
+                    "action": "Cancel",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "1D Axis",
+                    "id": "8d541479-89d4-4cff-89b2-a2b81c1f76e9",
+                    "path": "1DAxis",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Rotate",
+                    "isComposite": true,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "negative",
+                    "id": "03bf9d71-3194-4081-8662-0a5508cfbc0a",
+                    "path": "<Keyboard>/q",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Rotate",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "positive",
+                    "id": "911d778c-5c7b-4492-a748-de8dd6f41d4b",
+                    "path": "<Keyboard>/e",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Rotate",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "",
+                    "id": "04f7e76c-c22b-4c4c-b3a6-18bf52965293",
+                    "path": "<Keyboard>/b",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "ToggleBuildingPanel",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
@@ -569,50 +631,8 @@
         {
             "name": "Debug",
             "id": "66218bf5-f712-4095-8619-9585033c31aa",
-            "actions": [
-                {
-                    "name": "DebugNitro",
-                    "type": "Button",
-                    "id": "42a672bb-8816-4675-a693-8593d6173c82",
-                    "expectedControlType": "",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
-                },
-                {
-                    "name": "DebugInvincible",
-                    "type": "Button",
-                    "id": "9daf73ce-3f6c-4ee5-8915-02f0dc87d88d",
-                    "expectedControlType": "",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
-                }
-            ],
-            "bindings": [
-                {
-                    "name": "",
-                    "id": "2f389d1a-eef9-4475-a9d4-cb4f410ee7cb",
-                    "path": "<Keyboard>/n",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "DebugNitro",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "bef96f87-d8ed-4ad9-9b21-de66306a0466",
-                    "path": "<Keyboard>/i",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "DebugInvincible",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                }
-            ]
+            "actions": [],
+            "bindings": []
         }
     ],
     "controlSchemes": []
