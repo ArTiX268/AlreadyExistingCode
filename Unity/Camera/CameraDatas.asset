@@ -21,28 +21,25 @@ MonoBehaviour:
   reachingMaxSmoothSpeedAnim:
     duration: 2
     transition: 15
-  allowLockX: 0
-  allowLockY: 0
   minZoom: 1
-  maxZoom: 4
+  maxZoom: 2.84
   zoomAnim:
     duration: 3
     transition: 26
-  useInfluencePoints: 1
   usesBoxLimits: 0
   drawBoxLimits: 0
   boxWidth: 0.3
   boxHeight: 1
   boxOffset: {x: 0, y: 0}
-  drawAnchorCross: 1
+  drawAnchorCross: 0
   anchorCrossColor: {r: 0, g: 0, b: 0, a: 1}
   anchorCrossSize: 1
   drawTargetAnchorCross: 0
   targetAnchorCrossColor: {r: 1, g: 0.737563, b: 0, a: 1}
   targetAnchorCrossSize: 0
-  drawTargetCross: 1
+  drawTargetCross: 0
   targetCrossColor: {r: 1, g: 0, b: 0, a: 1}
   targetCrossSize: 1
-  drawFocusCross: 1
+  drawFocusCross: 0
   focusCrossColor: {r: 0, g: 1, b: 0.002593279, a: 1}
   focusCrossSize: 1

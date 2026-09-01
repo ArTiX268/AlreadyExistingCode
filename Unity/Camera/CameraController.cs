@@ -5,6 +5,13 @@ using UnityEngine;
 [RequireComponent(typeof(Camera)), ExecuteInEditMode]
 public class CameraController : MonoBehaviour
 {
+    public struct ZoomAnim
+    {
+        public Tween.AnimParams zoomInParams;
+        public float holdDuration;
+        public Tween.AnimParams zoomOutParams;
+    }
+
     private static CameraController instance;
     public static CameraController Instance
     {
@@ -24,19 +31,14 @@ public class CameraController : MonoBehaviour
     public bool lockX;
     public bool lockY;
 
-    [SerializeField] private float zoom = 1;
-    private float startingZoom;
-    private float targetZoom;
-    private float zoomTimer;
+    [SerializeField] private float currentZoom = 1;
+    private Tween zoomTween;
 
     private Camera cam;
 
     private delegate void DoMoveCamera(ref Vector3 targetPos);
     private DoMoveCamera doBoxLimit;
     private DoMoveCamera doInfluencePoint;
-
-    private delegate void DoZoom();
-    private DoZoom doZoom;
 
     private void Awake()
     {
@@ -56,38 +58,39 @@ public class CameraController : MonoBehaviour
         // POSITION
         Vector3 targetPos = anchor.position;
 
-        doBoxLimit?.Invoke(ref targetPos);
-        doInfluencePoint?.Invoke(ref targetPos);
-
-        #region Displacment
-
-        Vector3 nextPos = transform.position;
-        if (Vector2.Distance(nextPos, targetPos) > datas.distanceThreshold)
+        if (zoomTween == null || !zoomTween.IsActive)
         {
-            if (smoothSpeedTimer != datas.reachingMaxSmoothSpeedAnim.duration)
+            doBoxLimit?.Invoke(ref targetPos);
+            doInfluencePoint?.Invoke(ref targetPos);
+
+            #region Displacment
+
+            Vector3 nextPos = transform.position;
+            if (Vector2.Distance(nextPos, targetPos) > datas.distanceThreshold)
             {
-                smoothSpeedTimer += Time.deltaTime;
-                smoothSpeedTimer = Mathf.Clamp(smoothSpeedTimer, 0, datas.reachingMaxSmoothSpeedAnim.duration);
-                smoothSpeed = Tween.InterpolateValue(datas.minSmoothSpeed, datas.maxSmoothSpeed, smoothSpeedTimer, datas.reachingMaxSmoothSpeedAnim);
+                if (smoothSpeedTimer != datas.reachingMaxSmoothSpeedAnim.duration)
+                {
+                    smoothSpeedTimer += Time.deltaTime;
+                    smoothSpeedTimer = Mathf.Clamp(smoothSpeedTimer, 0, datas.reachingMaxSmoothSpeedAnim.duration);
+                    smoothSpeed = Tween.InterpolateValue(datas.minSmoothSpeed, datas.maxSmoothSpeed, smoothSpeedTimer, datas.reachingMaxSmoothSpeedAnim);
+                }
             }
+            else
+            {
+                smoothSpeedTimer = 0;
+                smoothSpeed = datas.minSmoothSpeed;
+            }
+
+            if (!lockX)
+                nextPos.x = SmoothCam(datas.smoothX, transform.position.x, smoothSpeed.x, targetPos.x);
+
+            if (!lockY)
+                nextPos.y = SmoothCam(datas.smoothY, transform.position.y, smoothSpeed.y, targetPos.y);
+
+            transform.position = nextPos;
+
+            #endregion
         }
-        else
-        {
-            smoothSpeedTimer = 0;
-            smoothSpeed = datas.minSmoothSpeed;
-        }
-
-        if (!lockX)
-            nextPos.x = SmoothCam(datas.smoothX, transform.position.x, smoothSpeed.x, targetPos.x);
-
-        if (!lockY)
-            nextPos.y = SmoothCam(datas.smoothY, transform.position.y, smoothSpeed.y, targetPos.y);
-
-        transform.position = nextPos;
-
-        #endregion
-
-        doZoom?.Invoke();
 
         #region Debug
 
@@ -158,7 +161,11 @@ public class CameraController : MonoBehaviour
         if (totalWeight != 0)
         {
             totalZoom /= totalWeight;
-            SetZoom(totalZoom);
+            SetZoom(totalZoom, new Tween.AnimParams
+            {
+                duration = 1,
+                transition = Tween.ETransition.SmoothStep5
+            });
             targetPos = totalPos / totalWeight;
         }
     }
@@ -171,22 +178,28 @@ public class CameraController : MonoBehaviour
             return targetPos;
     }
 
-    public void SetZoom(float zoom)
+    public void SetZoom(float zoom, in Tween.AnimParams zoomAnim)
     {
-        zoomTimer = 0;
-        startingZoom = this.zoom;
-        targetZoom = Mathf.Clamp(zoom, datas.minZoom, datas.maxZoom);
-        doZoom += Zoom;
+        if (zoomTween == null) zoomTween = Tween.Create("Zoom Tween", false);
+        if (zoomTween.IsActive) zoomTween.Clear();
+
+        zoomTween.TweenEvent(currentZoom, zoom, TweenZoom, zoomAnim, timeScaled: true);
     }
 
-    private void Zoom()
+    public void ZoomOnPoint(Vector3 point, in float zoomLevel, in ZoomAnim zoomAnim)
     {
-        zoomTimer = Mathf.Clamp(zoomTimer + Time.deltaTime, 0, datas.zoomAnim.duration);
-        zoom = Tween.InterpolateValue(startingZoom, targetZoom, zoomTimer, datas.zoomAnim);
+        if (zoomTween == null) zoomTween = Tween.Create("Zoom Tween", false);
+        if (zoomTween.IsActive) zoomTween.Clear();
 
-        if (zoomTimer == datas.zoomAnim.duration) doZoom -= Zoom;
+        point.z = transform.position.z;
+        zoomTween.TweenEvent(currentZoom, zoomLevel, TweenZoom, zoomAnim.zoomInParams, timeScaled: true);
+        zoomTween.TweenEvent(transform.position, point, TweenPos, zoomAnim.zoomInParams, timeScaled: true, parrallel: true);
 
-        if (cam.orthographicSize != datas.defaultSize / zoom)
-            cam.orthographicSize = datas.defaultSize / zoom;
+        zoomTween.TweenEvent(zoomLevel, currentZoom, TweenZoom, zoomAnim.zoomOutParams, timeScaled: true, delay: zoomAnim.holdDuration);
+        zoomTween.TweenEvent(point, transform.position, TweenPos, zoomAnim.zoomOutParams, timeScaled: true, parrallel: true);
     }
+
+    private void TweenZoom(float newZoom) => cam.orthographicSize = datas.defaultSize / newZoom;
+
+    private void TweenPos(Vector3 newPos) => transform.position = newPos;
 }
