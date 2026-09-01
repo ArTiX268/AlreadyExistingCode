@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6d3c3f94092bc864b805cb786c59f106, type: 3}
+  m_Name: so_PlayerInteractor
+  m_EditorClassIdentifier: Assembly-CSharp::ArTiX.Interaction.InteractorSO
+  interactionMask:
+    serializedVersion: 2
+    m_Bits: 64
+  infinite: 0
+  interactionDistance: 500
+  interactionRadius: 20
+  outlineMode: 1
+  outlineColor: {r: 0, g: 0, b: 0, a: 1}
+  outlineWidth: 10
