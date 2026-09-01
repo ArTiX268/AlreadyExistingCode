@@ -22,23 +22,28 @@ namespace ArTiX.Effects
         [Header("Parameters")]
         [SerializeField] private Vector2 amplitude = Vector2.one * 5f;
         [SerializeField, Tooltip("To shake the angle")] private float maxAngle = 0;
-        [SerializeField, Range(0, 1)] public float intensityCoef = 1;
         [SerializeField] private float jitteriness = 1;
-        [SerializeField] private bool timeScaled;
+        [SerializeField] private bool timeScaled = true;
 
         [Header("Anim")]
-        [SerializeField, Tooltip("Anim to reach max intensity.")] private Tween.AnimParams attackParams;
+        [SerializeField, Tooltip("Anim to reach max intensity.")] private Tween.MasterTween.AnimParams attackParams;
         [SerializeField, Tooltip("How much time the shake will be active at full intensity.")] private float holdDuration;
-        [SerializeField, Tooltip("Anim to reach 0 intensity.")] private Tween.AnimParams releaseParams;
+        [SerializeField, Tooltip("Anim to reach 0 intensity.")] private Tween.MasterTween.AnimParams releaseParams;
 
-        private readonly List<Target> targetsDatas = new List<Target>();
+        private readonly List<TargetData> targetsDatas = new List<TargetData>();
+
+        private float intensityCoef = 1;
 
         private float intensity;
 
         private Vector2 Amplitude => amplitude * (intensity * intensityCoef);
         private float Angle => maxAngle * intensity * intensityCoef;
+        public bool IsPlaying => intensity > 0;
 
-        private Tween intensityTween;
+        private MasterTween.Tween intensityTween;
+        private MasterTween.Tween intensityCoefTween;
+
+        private Vector2 currentOffset = Vector2.zero;
 
         #endregion
 
@@ -50,6 +55,8 @@ namespace ArTiX.Effects
                 if (target != null) newTargets.Add(target);
             }
             targets = newTargets;
+
+            amplitude = amplitude.Abs();
         }
 
         private void Update()
@@ -66,7 +73,7 @@ namespace ArTiX.Effects
                 float angleOffset;
 
                 float time = timeScaled ? Time.time : Time.unscaledTime;
-                Target targetDatas;
+                TargetData targetDatas;
                 for (int i = 0; i < nbTarget; i++)
                 {
                     xNoise = new FastNoise(i);
@@ -81,6 +88,9 @@ namespace ArTiX.Effects
                     offsetY = Amplitude.y * yNoise.GetPerlin(time, 0);
                     angleOffset = Angle * angleNoise.GetPerlin(time, 0);
 
+                    offsetX += currentOffset.x;
+                    offsetY += currentOffset.y;
+
                     targetDatas = targetsDatas[i];
                     targetDatas.target.SetLocalPositionAndRotation(
                         localPosition: targetDatas.origin + new Vector3(offsetX, offsetY, 0),
@@ -92,16 +102,27 @@ namespace ArTiX.Effects
 
         public void Shake()
         {
-            if (targets == null || targets.Count == 0) return;
+            if (targets?.Count == 0) return;
 
             Stop();
 
             targetsDatas.Clear();
             intensity = 0f;
 
-            intensityTween = Tween.Create();
-            intensityTween.TweenEvent(0, 1, ModifyIntensity, attackParams);
-            intensityTween.TweenEvent(1, 0, ModifyIntensity, releaseParams, delay: holdDuration);
+            intensityTween?.Kill();
+
+            intensityTween = Tween.MasterTween.Create("Intensity Tween");
+            intensityTween.TweenEvent(
+                startValue: 0, 
+                targetValue: 1,
+                tweenEvent: TweenIntensity, 
+                animParams: attackParams);
+            intensityTween.TweenEvent(
+                startValue: 1,
+                targetValue: 0, 
+                tweenEvent: TweenIntensity, 
+                animParams: releaseParams, 
+                delay: holdDuration);
 
             for (int i = targets.Count - 1; i >= 0; i--)
             {
@@ -111,11 +132,11 @@ namespace ArTiX.Effects
                     continue;
                 }
 
-                targetsDatas.Add(new Target
+                targetsDatas.Add(new TargetData
                 {
                     target = targets[i],
                     origin = targets[i].localPosition,
-                    originAngle = targets[i].eulerAngles.z
+                    originAngle = targets[i].localRotation.eulerAngles.z
                 });
             }
         }
@@ -131,15 +152,44 @@ namespace ArTiX.Effects
                     targetsDatas.RemoveAt(i);
                     continue;
                 }
-                targetsDatas[i].target.localPosition = targetsDatas[i].origin;
+                targetsDatas[i].target.SetLocalPositionAndRotation(
+                    localPosition: targetsDatas[i].origin,
+                    localRotation: Quaternion.Euler(0, 0, targetsDatas[i].originAngle));
             }
 
             intensityTween?.Kill();
             intensityTween = null;
         }
 
-        public bool IsPlaying() => intensity > 0;
+        public void Push(in Vector2 offset, in float duration)
+        {
+            if (duration <= 0) return;
 
-        private void ModifyIntensity(float newIntensity) => intensity = newIntensity;
+            MasterTween.Tween tween = MasterTween.Create();
+            tween.TweenEvent(Vector2.zero, offset, TweenOffset, animParams: new MasterTween.AnimParams
+            (duration, MasterTween.ETransition.SmoothStopArch3));
+        }
+
+        private void TweenOffset(Vector2 offset) => currentOffset = offset;
+
+        private void TweenIntensity(float newIntensity) => intensity = newIntensity;
+
+        public void ChangeIntensityCoef(float targetValue, 
+            float duration = 0, MasterTween.ETransition transition = MasterTween.ETransition.Linear)
+        {
+            if (duration <= 0) return;
+            if (duration == 0) intensityCoef = targetValue;
+
+            intensityCoefTween?.Kill();
+            intensityCoefTween = MasterTween.Create("IntensityCoef Tween");
+            intensityCoefTween.TweenEvent(
+                startValue: intensityCoef,
+                targetValue: targetValue,
+                tweenEvent: TweenIntensityCoef,
+                new MasterTween.AnimParams(duration, transition)
+            );
+        }
+
+        private void TweenIntensityCoef(float newIntensityCoef) => intensityCoef = newIntensityCoef;
     }
 }
