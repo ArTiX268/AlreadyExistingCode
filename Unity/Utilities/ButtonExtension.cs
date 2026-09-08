@@ -26,6 +26,11 @@ namespace ArTiX.Utils
         }
 
         public void PlayClickSound(AudioDatasSO datas) => AudioManager.Instance.Play(datas);
+        public void RemoveClickEvent()
+        {
+            parameter = default;
+            OnClickEvent = null;
+        }
 
         private void OnClick() => OnClickEvent?.Invoke(parameter);
     }

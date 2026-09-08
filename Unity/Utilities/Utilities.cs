@@ -503,5 +503,10 @@ namespace ArTiX.Utils
         }
     }
 
+    public static class Texture2DExtsension
+    {
+        public static Vector2 GetSize(this Texture2D tex) => new Vector2(tex.width, tex.height);
+    }
+
     #endregion
 }

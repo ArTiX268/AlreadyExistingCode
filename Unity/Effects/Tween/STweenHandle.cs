@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace ArTiX.Effects.Tween
 {
@@ -55,6 +56,13 @@ namespace ArTiX.Effects.Tween
             float delay = 0, bool parrallel = false, bool timeScaled = false, Action onFinishedStepEvent = null)
         {
             if (IsAlive) tween.TweenProperty(target, group, startValue, targetValue, animParams, delay, parrallel, timeScaled, onFinishedStepEvent);
+            return this;
+        }
+
+        public STweenHandle TweenProperty(UnityEngine.Object target, Image image, float startValue, float targetValue, Tween.AnimParams animParams,
+            float delay = 0, bool parrallel = false, bool timeScaled = false, Action onFinishedStepEvent = null)
+        {
+            if (IsAlive) tween.TweenProperty(target, image, startValue, targetValue, animParams, delay, parrallel, timeScaled, onFinishedStepEvent);
             return this;
         }
 

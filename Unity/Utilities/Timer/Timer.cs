@@ -1,6 +1,5 @@
 ﻿using ArTiX.Utils.Pool;
 using System;
-using UnityEditor;
 using UnityEngine;
 
 namespace ArTiX.Utils
@@ -10,7 +9,7 @@ namespace ArTiX.Utils
         private static Pool<Timer> pool;
         private const int DEFAULT_POOL_SIZE = 10;
         private const int MAX_POOL_SIZE = DEFAULT_POOL_SIZE * 2;
-        private const string PATH_TIMER_PREFAB = "Assets/_PROJECT/Shared/Utilities/Timer/prfb_Timer.prefab";
+        private const string PATH_TIMER_PREFAB = "prfb_Timer";
 
         static Timer()
         {
@@ -51,7 +50,7 @@ namespace ArTiX.Utils
 
         private static Timer Create()
         {
-            return Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>(PATH_TIMER_PREFAB)).GetComponent<Timer>();
+            return Instantiate(Resources.Load<GameObject>(PATH_TIMER_PREFAB)).GetComponent<Timer>();
         }
 
         private static void KillPool() => pool = null;

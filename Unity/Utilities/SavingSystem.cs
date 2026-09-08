@@ -3,47 +3,46 @@ using UnityEngine;
 
 namespace ArTiX.Utils.FileManagement
 {
-    public class SavedData
+    public abstract class SavedData
     {
-        public Vector2Int[] cells;
+
     }
 
-    public static class SavingSystem
+    public static class SavingSystem<T> where T : SavedData
     {
-        private const string SAVING_PATH = "/Json/PlayerData.json";
-        private static readonly string completePath;
+        private const string SAVING_FILE = "PlayerData.json";
+        private static readonly string SAVING_FOLDER = Application.persistentDataPath + "/Json/";
+        private static readonly string COMPLETE_PATH = SAVING_FOLDER + SAVING_FILE;
 
         static SavingSystem()
         {
-            completePath = Application.persistentDataPath + SAVING_PATH;
+            if (!Directory.Exists(SAVING_FOLDER))
+                Directory.CreateDirectory(SAVING_FOLDER);
         }
 
-        public static void Save(in SavedData dataToSave)
+        public static void Save(in T dataToSave)
         {
             if (dataToSave == null) return;
 
-            if (!Directory.Exists(Application.persistentDataPath + "/Json"))
-                Directory.CreateDirectory(Application.persistentDataPath + "/Json");
-
-            if (!File.Exists(completePath))
+            if (!File.Exists(COMPLETE_PATH))
             {
-                FileStream file = File.Create(completePath);
+                FileStream file = File.Create(COMPLETE_PATH);
                 file.Close();
             }
 
-            StreamWriter writer = new StreamWriter(completePath, false);
+            StreamWriter writer = new StreamWriter(COMPLETE_PATH, false);
 
             string jsonTxt = JsonUtility.ToJson(dataToSave, true);
             writer.Write(jsonTxt);
             writer.Close();
         }
 
-        public static SavedData LoadData()
+        public static T LoadData()
         {
-            if (!File.Exists(completePath)) return null;
+            if (!File.Exists(COMPLETE_PATH)) return null;
 
-            StreamReader reader = File.OpenText(completePath);
-            SavedData loadedDatas = JsonUtility.FromJson<SavedData>(reader.ReadToEnd());
+            StreamReader reader = File.OpenText(COMPLETE_PATH);
+            T loadedDatas = JsonUtility.FromJson<T>(reader.ReadToEnd());
             reader.Close();
             return loadedDatas;
         }

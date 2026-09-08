@@ -1,8 +1,8 @@
 using ArTiX.Utils.Pool;
 using System;
 using System.Collections.Generic;
-using UnityEditor;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace ArTiX.Effects.Tween
 {
@@ -54,6 +54,11 @@ namespace ArTiX.Effects.Tween
             {
                 this.duration = duration;
                 this.transition = transition;
+            }
+
+            public readonly bool IsDefault()
+            {
+                return duration == 0;
             }
         }
 
@@ -192,8 +197,9 @@ namespace ArTiX.Effects.Tween
         private class FloatTweener : EventTweener<float>
         {
             private Material mat;
-            private CanvasGroup group;
             private string property;
+            private CanvasGroup group;
+            private Image image;
 
             public FloatTweener(UnityEngine.Object target, Tween masterTween, float startValue, float targetValue, Action<float> tweenEvent, AnimParams animParams, float delay, bool scaled, Action onFinishedStepEvent) :
                 base(target, masterTween, startValue, targetValue, tweenEvent, animParams, delay, scaled, onFinishedStepEvent)
@@ -213,12 +219,20 @@ namespace ArTiX.Effects.Tween
                 this.group = group;
             }
 
+            public FloatTweener(UnityEngine.Object target, Tween masterTween, Image image, float startValue, float targetValue, AnimParams animParams, float delay, bool scaled, Action onFinishedStepEvent) :
+                base(target, masterTween, startValue, targetValue, tweenEvent: null, animParams, delay, scaled, onFinishedStepEvent)
+            {
+                this.image = image;
+            }
+
             protected override void InvokeEvent()
             {
                 if (mat != null)
                     mat.SetFloat(property, InterpolateValue());
                 else if (group != null)
                     group.alpha = InterpolateValue();
+                else if (image != null)
+                    image.fillAmount = InterpolateValue();
                 else
                     base.InvokeEvent();
             }
@@ -351,7 +365,7 @@ namespace ArTiX.Effects.Tween
         private static Pool<Tween> pool;
         private const int DEFAULT_POOL_SIZE = 30;
         private const int MAX_POOL_SIZE = DEFAULT_POOL_SIZE * 2;
-        private const string PATH_TWEEN_PREFAB = "Assets/_PROJECT/Shared/Effects/Tween/prfb_Tween.prefab";
+        private const string PATH_TWEEN_PREFAB = "prfb_Tween";
 
         static Tween()
         {
@@ -376,7 +390,7 @@ namespace ArTiX.Effects.Tween
         private static Tween CreateTween()
         {
             tweenParent ??= new GameObject("Tweens").transform;
-            return Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>(PATH_TWEEN_PREFAB), tweenParent).GetComponent<Tween>();
+            return Instantiate(Resources.Load<GameObject>(PATH_TWEEN_PREFAB), tweenParent).GetComponent<Tween>();
         }
 
         private static void KillPool()
@@ -674,6 +688,12 @@ namespace ArTiX.Effects.Tween
         {
             GetTweenerList(out List<Tweener> tweenerList, ref delay, parrallel);
             tweenerList.Add(new FloatTweener(target, this, group, startValue, targetValue, animParams, delay, timeScaled, onFinishedStepEvent));
+        }
+
+        public void TweenProperty(UnityEngine.Object target, Image image, float startValue, float targetValue, AnimParams animParams, float delay, bool parrallel, bool timeScaled, Action onFinishedStepEvent)
+        {
+            GetTweenerList(out List<Tweener> tweenerList, ref delay, parrallel);
+            tweenerList.Add(new FloatTweener(target, this, image, startValue, targetValue, animParams, delay, timeScaled, onFinishedStepEvent));
         }
 
         #endregion

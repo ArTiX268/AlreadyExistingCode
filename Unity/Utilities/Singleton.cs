@@ -14,6 +14,9 @@ namespace ArTiX.Utils
             }
         }
 
+        /// <summary>
+        /// Call SetInstance(this) inside.
+        /// </summary>
         protected abstract void Awake();
 
         protected void SetInstance(in T instance)
