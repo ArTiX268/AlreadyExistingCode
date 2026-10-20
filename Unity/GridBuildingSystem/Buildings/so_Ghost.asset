@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 94e4e0da2713c104a9dd16cff562f451, type: 3}
+  m_Name: so_Ghost
+  m_EditorClassIdentifier: Assembly-CSharp::ArTiX.GridBuildingSystem.Datas.GhostSO
+  positionAnim:
+    duration: 0.5
+    transition: 8
+  rotationAnim:
+    duration: 0.4
+    transition: 10
+  colorChangeAnim:
+    duration: 0.2
+    transition: 9
+  validColor: {r: 0, g: 1, b: 0, a: 0.5882353}
+  unvalidColor: {r: 1, g: 0, b: 0, a: 0.5882353}

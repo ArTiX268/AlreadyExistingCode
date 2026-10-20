@@ -195,7 +195,7 @@ namespace ArTiX.Utils
 
     #region Class Extension
 
-    public static class ArrayExtension
+    public static class CollectionsExtension
     {
         public static bool Contains<T>(this T[] array, T element) => Array.IndexOf(array, element) >= 0;
 
@@ -213,6 +213,13 @@ namespace ArTiX.Utils
             foreach (T element in array) list.Add(element);
 
             return list;
+        }
+
+        public static T GetRandomElement<T>(this List<T> list)
+        {
+            if (list.Count == 0) return default;
+
+            return list[UnityEngine.Random.Range(0, list.Count)];
         }
     }
 
@@ -252,6 +259,14 @@ namespace ArTiX.Utils
         {
             Vector3 vector = transform.position - other.position;
             return normalized ? vector.normalized : vector;
+        }
+
+        public static void DestroyChildren(this Transform transform)
+        {
+            for (int i = transform.childCount - 1; i >= 0; i--)
+            {
+                MonoBehaviour.Destroy(transform.GetChild(i).gameObject);
+            }
         }
     }
 
@@ -457,6 +472,11 @@ namespace ArTiX.Utils
             return Mathf.Abs(point.x - rect.center.x) - Utilities.FLOAT_THRESHOLD <= rectHalfSize.x && 
                    Mathf.Abs(point.y - rect.center.y) - Utilities.FLOAT_THRESHOLD <= rectHalfSize.y;
         }
+    }
+
+    public static class Texture2DExtsension
+    {
+        public static Vector2 GetSize(this Texture2D tex) => new Vector2(tex.width, tex.height);
     }
 
     #endregion

@@ -18,11 +18,12 @@ namespace ArTiX.Input
         }
 
         // Actions
-        public event Action<Vector2> OnDragging;
-        public event Action OnSimpleTapStarted;
-        public event Action OnSimpleTapCanceled;
-        public event Action OnDebugNitro;
-        public event Action OnDebugInvincible;
+        public event Action OnSelect;
+        public event Action OnStartCreatingBuilding;
+        public event Action OnFinishCreating;
+        public event Action OnCancel;
+        public event Action OnToggleBuildingPanel;
+        public event Action<int> OnRotate;
 
         private void Awake()
         {
@@ -30,40 +31,32 @@ namespace ArTiX.Input
             else Destroy(gameObject);
         }
 
-        public void GetTouchPos(InputAction.CallbackContext ctxt)
+        public void LeftMouseButton(InputAction.CallbackContext ctxt)
         {
-            OnDragging?.Invoke(ConvertTouchPosToWorldPos(ctxt.ReadValue<Vector2>()));
+            if (ctxt.started) OnStartCreatingBuilding?.Invoke();
+            if (ctxt.performed) OnSelect?.Invoke();
+            if (ctxt.canceled) OnFinishCreating?.Invoke();
         }
 
-        public void OnSimpleTouch(InputAction.CallbackContext ctxt)
+        public void Cancel(InputAction.CallbackContext ctxt)
         {
-            if (ctxt.performed) OnSimpleTapStarted?.Invoke();
-            else if (ctxt.canceled) OnSimpleTapCanceled?.Invoke();
+            if (ctxt.performed) OnCancel?.Invoke();
         }
 
-        public void DebugNitro()
+        public void Rotate(InputAction.CallbackContext ctxt)
         {
-            OnDebugNitro?.Invoke();
+            if (ctxt.performed) OnRotate?.Invoke(Mathf.CeilToInt(ctxt.ReadValue<float>()));
         }
 
-        public void DebugInvincible(InputAction.CallbackContext ctxt)
+        public void ToggleBuildingPanel(InputAction.CallbackContext ctxt)
         {
-            if (ctxt.started)
-                OnDebugInvincible?.Invoke();
-        }
-
-        private Vector3 ConvertTouchPosToWorldPos(Vector2 touchPos)
-        {
-            Vector3 realWorldPos = Camera.main.ScreenToWorldPoint(touchPos);
-            realWorldPos.z = 0;
-            return realWorldPos;
+            if (ctxt.performed) OnToggleBuildingPanel?.Invoke();
         }
 
         public void ClearAllEvents()
         {
-            OnDragging = null;
-            OnSimpleTapStarted = null;
-            OnSimpleTapCanceled = null;
+            OnSelect = null;
+            OnCancel = null;
         }
     }
 }
