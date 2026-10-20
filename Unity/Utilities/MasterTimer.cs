@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace ArTiX.Utils
+namespace Utils
 {
     public class MasterTimer : MonoBehaviour
     {

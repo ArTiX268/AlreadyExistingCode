@@ -56,7 +56,7 @@ namespace ArTiX.Effects.Tween
 
                 InvokeEvent();
 
-                if (timer >= animParams.Duration)
+                if (timer >= animParams.duration)
                 {
                     OnFinishedStepEvent?.Invoke();
                     return true;
@@ -101,6 +101,7 @@ namespace ArTiX.Effects.Tween
         {
             private Material mat;
             private CanvasGroup group;
+            private AudioSource source;
             private string property;
 
             public FloatTweener(float startValue, float targetValue, Action<float> tweenEvent, AnimParams animParams, float delay, bool scaled, Action onFinishedStepEvent) :
@@ -121,12 +122,20 @@ namespace ArTiX.Effects.Tween
                 this.group = group;
             }
 
+            public FloatTweener(AudioSource source, float startValue, float targetValue, AnimParams animParams, float delay, bool scaled, Action onFinishedStepEvent) :
+                base(startValue, targetValue, tweenEvent: null, animParams, delay, scaled, onFinishedStepEvent)
+            {
+                this.source = source;
+            }
+
             protected override void InvokeEvent()
             {
                 if (mat != null)
                     mat.SetFloat(property, InterpolateValue());
                 else if (group != null)
                     group.alpha = InterpolateValue();
+                else if (source != null)
+                    source.volume = InterpolateValue();
                 else
                     base.InvokeEvent();
             }
@@ -247,17 +256,8 @@ namespace ArTiX.Effects.Tween
         [Serializable]
         public struct AnimParams
         {
-            [SerializeField] private float duration;
-            [SerializeField] private ETransition transition;
-
-            public readonly float Duration => duration;
-            public readonly ETransition Transition => transition;
-
-            public AnimParams(float duration, ETransition transition)
-            {
-                this.duration = duration;
-                this.transition = transition;
-            }
+            public float duration;
+            public ETransition transition;
         }
 
         [Serializable]
@@ -299,6 +299,11 @@ namespace ArTiX.Effects.Tween
             public void TweenProperty(CanvasGroup group, float startValue, float targetValue, AnimParams animParams,
                 float delay = 0, bool parrallel = false, bool timeScaled = false, Action onFinishedStepEvent = null)
                  => tween.TweenProperty(group, startValue, targetValue, animParams, delay, parrallel, timeScaled, onFinishedStepEvent);
+
+            public void TweenProperty(AudioSource source, float startValue, float targetValue, AnimParams animParams,
+                float delay = 0, bool parrallel = false, bool timeScaled = false, Action onFinishedStepEvent = null)
+                 => tween.TweenProperty(source, startValue, targetValue, animParams, delay, parrallel, timeScaled, onFinishedStepEvent);
+
 
             #endregion
 
@@ -541,7 +546,7 @@ namespace ArTiX.Effects.Tween
         }
 
         public static float InterpolateValue(float startValue, float targetValue, float elapsedTime, AnimParams animParams)
-            => InterpolateValue(startValue, targetValue, animParams.Duration, elapsedTime, animParams.Transition);
+            => InterpolateValue(startValue, targetValue, animParams.duration, elapsedTime, animParams.transition);
 
         public static float InterpolateValue(float startValue, float targetValue, float duration, float elapsedTime, ETransition transition = ETransition.Linear)
             => InterpolateValue(startValue, targetValue, elapsedTime / duration, transition);
@@ -555,7 +560,7 @@ namespace ArTiX.Effects.Tween
         }
 
         public static Vector2 InterpolateValue(Vector2 startValue, Vector2 targetValue, float elapsedTime, AnimParams animParams)
-            => InterpolateValue(startValue, targetValue, animParams.Duration, elapsedTime, animParams.Transition);
+            => InterpolateValue(startValue, targetValue, animParams.duration, elapsedTime, animParams.transition);
 
         public static Vector2 InterpolateValue(Vector2 startValue, Vector2 targetValue, float duration, float elapsedTime, ETransition transition = ETransition.Linear)
             => InterpolateValue(startValue, targetValue, elapsedTime / duration, transition);
@@ -569,7 +574,7 @@ namespace ArTiX.Effects.Tween
         }
 
         public static Vector3 InterpolateValue(Vector3 startValue, Vector3 targetValue, float elapsedTime, AnimParams animParams)
-            => InterpolateValue(startValue, targetValue, animParams.Duration, elapsedTime, animParams.Transition);
+            => InterpolateValue(startValue, targetValue, animParams.duration, elapsedTime, animParams.transition);
 
         public static Vector3 InterpolateValue(Vector3 startValue, Vector3 targetValue, float duration, float elapsedTime, ETransition transition = ETransition.Linear)
             => InterpolateValue(startValue, targetValue, elapsedTime / duration, transition);
@@ -583,7 +588,7 @@ namespace ArTiX.Effects.Tween
         }
 
         public static Quaternion InterpolateValue(Quaternion startValue, Quaternion targetValue, float elapsedTime, AnimParams animParams)
-            => InterpolateValue(startValue, targetValue, animParams.Duration, elapsedTime, animParams.Transition);
+            => InterpolateValue(startValue, targetValue, animParams.duration, elapsedTime, animParams.transition);
 
         public static Quaternion InterpolateValue(Quaternion startValue, Quaternion targetValue, float duration, float elapsedTime, ETransition transition = ETransition.Linear)
             => InterpolateValue(startValue, targetValue, elapsedTime / duration, transition);
@@ -800,6 +805,12 @@ namespace ArTiX.Effects.Tween
             tweenerList.Add(new FloatTweener(group, startValue, targetValue, animParams, delay, timeScaled, onFinishedStepEvent));
         }
 
+        private void TweenProperty(AudioSource source, float startValue, float targetValue, AnimParams animParams, float delay, bool parrallel, bool timeScaled, Action onFinishedStepEvent)
+        {
+            SetupTweener(out List<Tweener> tweenerList, ref delay, parrallel);
+            tweenerList.Add(new FloatTweener(source, startValue, targetValue, animParams, delay, timeScaled, onFinishedStepEvent));
+        }
+
         #endregion
 
         #region Add Event
@@ -993,6 +1004,8 @@ namespace ArTiX.Effects.Tween
 
         #endregion
 
+        #region CanvasGroup
+
         public static MasterTween.Tween TweenAlpha(this CanvasGroup group, in float targetValue, MasterTween.AnimParams animParams,
             float delay = 0, bool parrallel = false, bool timeScaled = false, Action onFinishedStepEvent = null, MasterTween.Tween tween = null)
         {
@@ -1009,5 +1022,26 @@ namespace ArTiX.Effects.Tween
             return tween;
         }
 
+        #endregion
+
+        #region AudioSource
+
+        public static MasterTween.Tween TweenVolume(this AudioSource source, in float targetValue, MasterTween.AnimParams animParams,
+            float delay = 0, bool parrallel = false, bool timeScaled = false, Action onFinishedStepEvent = null, MasterTween.Tween tween = null)
+        {
+            tween ??= MasterTween.Create();
+            tween.TweenProperty(source, source.volume, targetValue, animParams, delay, parrallel, timeScaled, onFinishedStepEvent);
+            return tween;
+        }
+
+        public static MasterTween.Tween TweenVolume(this AudioSource source, in float startValue, in float targetValue, MasterTween.AnimParams animParams,
+            float delay = 0, bool parrallel = false, bool timeScaled = false, Action onFinishedStepEvent = null, MasterTween.Tween tween = null)
+        {
+            tween ??= MasterTween.Create();
+            tween.TweenProperty(source, startValue, targetValue, animParams, delay, parrallel, timeScaled, onFinishedStepEvent);
+            return tween;
+        }
+
+        #endregion
     }
 }

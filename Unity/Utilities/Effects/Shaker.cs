@@ -166,8 +166,11 @@ namespace ArTiX.Effects
             if (duration <= 0) return;
 
             MasterTween.Tween tween = MasterTween.Create();
-            tween.TweenEvent(Vector2.zero, offset, TweenOffset, animParams: new MasterTween.AnimParams
-            (duration, MasterTween.ETransition.SmoothStopArch3));
+            tween.TweenEvent(Vector2.zero, offset, TweenOffset, new MasterTween.AnimParams
+            {
+                duration = duration,
+                transition = MasterTween.ETransition.SmoothStopArch3
+            });
         }
 
         private void TweenOffset(Vector2 offset) => currentOffset = offset;
@@ -186,7 +189,11 @@ namespace ArTiX.Effects
                 startValue: intensityCoef,
                 targetValue: targetValue,
                 tweenEvent: TweenIntensityCoef,
-                new MasterTween.AnimParams(duration, transition)
+                new MasterTween.AnimParams
+                {
+                    duration = duration,
+                    transition = transition
+                }
             );
         }
 

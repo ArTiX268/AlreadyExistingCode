@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using TMPro;
 using UnityEngine;
 
 namespace ArTiX.Utils
@@ -17,7 +16,6 @@ namespace ArTiX.Utils
         public const string FILL_AMOUNT = "_FillAmount";
         public const string HIT_AMOUNT = "_HitAmount";
         public const string CENTER = "_Center";
-        public const string COLOR = "_Color";
 
         public static Vector2 GetCenterOfTheScreen()
         {
@@ -37,17 +35,6 @@ namespace ArTiX.Utils
             worldPoint.y /= Screen.height;
 
             return worldPoint;
-        }
-
-        public static TextMeshPro SpawnText(in string text, in Vector3 position, in Quaternion rotation, in float fontSize)
-        {
-            TextMeshPro textObj = new GameObject("Text", typeof(TextMeshPro)).GetComponent<TextMeshPro>();
-            textObj.transform.SetPositionAndRotation(position, rotation);
-            textObj.text = text;
-            textObj.fontSize = fontSize;
-            textObj.alignment = TextAlignmentOptions.Center;
-
-            return textObj;
         }
     }
 
@@ -324,12 +311,6 @@ namespace ArTiX.Utils
             newVector.y = Mathf.Abs(vector.y);
             return newVector;
         }
-        public static Vector2Int Abs(this Vector2Int vec)
-        {
-            return new Vector2Int(
-                x: Mathf.Abs(vec.x),
-                y: Mathf.Abs(vec.y));
-        }
 
         public static bool Colinear(this Vector3 self, in Vector3 vector)
         {
@@ -404,21 +385,11 @@ namespace ArTiX.Utils
         /// </summary>
         /// <returns>A vector normal to this vector.</returns>
         public static Vector2 Normal(this Vector2 vec) => new Vector2(-vec.y, vec.x);
-
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="vec"></param>
-        /// <param name="angle">In degrees.</param>
-        /// <returns></returns>
-        public static Vector2Int Rotate(this Vector2Int vec, float angle)
-        {
-            angle *= Mathf.Deg2Rad;
-            return new Vector2Int(
-                x: Mathf.RoundToInt((vec.x * Mathf.Cos(angle)) - (vec.y * Mathf.Sin(angle))),
-                y: Mathf.RoundToInt((vec.x * Mathf.Sin(angle)) + (vec.y * Mathf.Cos(angle)))
-            );
-        }
+        /// <returns>A vector normal to this vector.</returns>
+        public static Vector2 Normal(this Vector3 vec) => new Vector2(-vec.y, vec.x);
     }
 
     public static class CameraExtension

@@ -18,10 +18,11 @@ namespace ArTiX.Input
         }
 
         // Actions
-        public event Action OnSelect;
-        public event Action OnCancel;
-        public event Action OnToggleBuildingPanel;
-        public event Action<int> OnRotate;
+        public event Action<Vector2> OnDragging;
+        public event Action OnSimpleTapStarted;
+        public event Action OnSimpleTapCanceled;
+        public event Action OnDebugNitro;
+        public event Action OnDebugInvincible;
 
         private void Awake()
         {
@@ -29,30 +30,40 @@ namespace ArTiX.Input
             else Destroy(gameObject);
         }
 
-        public void Select(InputAction.CallbackContext ctxt)
+        public void GetTouchPos(InputAction.CallbackContext ctxt)
         {
-            if (ctxt.performed) OnSelect?.Invoke();
+            OnDragging?.Invoke(ConvertTouchPosToWorldPos(ctxt.ReadValue<Vector2>()));
         }
 
-        public void Cancel(InputAction.CallbackContext ctxt)
+        public void OnSimpleTouch(InputAction.CallbackContext ctxt)
         {
-            if (ctxt.performed) OnCancel?.Invoke();
+            if (ctxt.performed) OnSimpleTapStarted?.Invoke();
+            else if (ctxt.canceled) OnSimpleTapCanceled?.Invoke();
         }
 
-        public void Rotate(InputAction.CallbackContext ctxt)
+        public void DebugNitro()
         {
-            if (ctxt.performed) OnRotate?.Invoke(Mathf.CeilToInt(ctxt.ReadValue<float>()));
+            OnDebugNitro?.Invoke();
         }
 
-        public void ToggleBuildingPanel(InputAction.CallbackContext ctxt)
+        public void DebugInvincible(InputAction.CallbackContext ctxt)
         {
-            if (ctxt.performed) OnToggleBuildingPanel?.Invoke();
+            if (ctxt.started)
+                OnDebugInvincible?.Invoke();
+        }
+
+        private Vector3 ConvertTouchPosToWorldPos(Vector2 touchPos)
+        {
+            Vector3 realWorldPos = Camera.main.ScreenToWorldPoint(touchPos);
+            realWorldPos.z = 0;
+            return realWorldPos;
         }
 
         public void ClearAllEvents()
         {
-            OnSelect = null;
-            OnCancel = null;
+            OnDragging = null;
+            OnSimpleTapStarted = null;
+            OnSimpleTapCanceled = null;
         }
     }
 }

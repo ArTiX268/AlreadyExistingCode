@@ -77,11 +77,11 @@ namespace ArTiX.Effects
             if (duration <= 0) return;
 
             Tween.MasterTween.Tween tween = Tween.MasterTween.Create();
-            tween.TweenEvent(camOffset, offset, SetCamOffset, 
-                animParams: new Tween.MasterTween.AnimParams(
-                    duration, 
-                    Tween.MasterTween.ETransition.SmoothStopArch3)
-            );
+            tween.TweenEvent(camOffset, offset, SetCamOffset, new Tween.MasterTween.AnimParams
+            {
+                duration = duration,
+                transition = Tween.MasterTween.ETransition.SmoothStopArch3
+            });
         }
 
         private void SetCamOffset(Vector2 result) => camOffset = result;
